@@ -1,6 +1,8 @@
 add_library(krc
     channel.hh
     channel.cc
+    closed_exception.hh
+    closed_exception.cc
     executor.hh
     executor.cc
     queue.hh

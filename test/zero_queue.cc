@@ -61,7 +61,7 @@ TEST_F(zero_queue_test, push_pop)
 TEST_F(zero_queue_test, push_on_closed_raises)
 {
   zq.close();
-  EXPECT_THROW(zq.push(1), zero_queue_closed);
+  EXPECT_THROW(zq.push(1), channel_closed);
 }
 
 }

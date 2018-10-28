@@ -3,15 +3,10 @@
 #include <mutex>
 #include <condition_variable>
 #include <optional>
-#include <stdexcept>
+
+#include "closed_exception.hh"
 
 namespace krc {
-
-class zero_queue_closed : public std::logic_error
-{
-public:
-  using std::logic_error::logic_error;
-};
 
 template <typename T>
 class zero_queue
@@ -54,7 +49,7 @@ void zero_queue<T>::push(T && item)
   d_can_push.wait(l, [=]{ return is_closed() || this->can_push(); });
 
   if(is_closed())
-    throw zero_queue_closed("push on a closed queue");
+    throw channel_closed("push on a closed channel");
 
   d_item = item;
 

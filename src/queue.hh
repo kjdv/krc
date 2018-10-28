@@ -4,16 +4,11 @@
 #include <mutex>
 #include <condition_variable>
 #include <optional>
-#include <stdexcept>
 #include <cassert>
 
-namespace krc {
+#include "closed_exception.hh"
 
-class queue_closed : public std::logic_error
-{
-public:
-  using std::logic_error::logic_error;
-};
+namespace krc {
 
 template <typename T>
 class queue
@@ -71,7 +66,7 @@ void queue<T>::push(T && item)
   d_not_full.wait(l, [=]{ return closed() || this->not_full(); });
 
   if(closed())
-    throw queue_closed("push on a closed queue");
+    throw channel_closed("push on a closed channel");
 
   d_base.emplace(std::forward<T>(item));
 
