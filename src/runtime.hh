@@ -21,4 +21,4 @@ void run(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_
 // returns true if control was yielded, false if this could not be done (no other routines waiting)
 bool yield();
 
-}
+} // namespace krc

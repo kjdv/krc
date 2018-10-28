@@ -1,7 +1,7 @@
 #include <channel.hh>
-#include <runtime.hh>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <runtime.hh>
 #include <vector>
 
 namespace krc {

@@ -1,5 +1,5 @@
-#include <runtime.hh>
 #include <iostream>
+#include <runtime.hh>
 
 using namespace krc;
 using namespace std;

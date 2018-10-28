@@ -1,6 +1,6 @@
-#include <runtime.hh>
 #include <gtest/gtest.h>
 #include <mutex.hh>
+#include <runtime.hh>
 
 namespace krc {
 namespace {
