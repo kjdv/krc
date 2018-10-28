@@ -1,4 +1,7 @@
 #include "executor.hh"
+
+#ifndef NO_UCONTEXT
+
 #include <cassert>
 #include <ucontext.h>
 #include <map>
@@ -157,3 +160,5 @@ void executor::yield()
 }
 
 }
+
+#endif

@@ -1,3 +1,12 @@
+#ifdef NO_UCONTEXT
+
+int main()
+{
+    return 1;
+}
+
+#else
+
 #include <executor.hh>
 #include <iostream>
 
@@ -41,3 +50,5 @@ int main()
 
   return 0;
 }
+
+#endif

@@ -13,3 +13,7 @@ add_library(krc
 target_include_directories(krc
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+if(APPLE)
+    target_compile_options(krc PUBLIC -DNO_UCONTEXT)
+endif()
