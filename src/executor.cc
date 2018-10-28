@@ -1,7 +1,4 @@
 #include "executor.hh"
-
-#ifndef NO_UCONTEXT
-
 #include <cassert>
 #include <ucontext.h>
 #include <map>
@@ -25,6 +22,8 @@ class executor::impl
 public:
   void push(const function<void ()> &target, size_t stack_size)
   {
+    assert(stack_size >= MIN_STACK_SIZE);
+
     int routine_id = d_targets.empty() ? 0 : d_targets.rbegin()->first + 1;
     auto it = d_targets.emplace(std::piecewise_construct,
                                 std::forward_as_tuple(routine_id),
@@ -160,5 +159,3 @@ void executor::yield()
 }
 
 }
-
-#endif

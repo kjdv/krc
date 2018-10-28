@@ -11,5 +11,5 @@ target_include_directories(krc
 )
 
 if(APPLE)
-    target_compile_options(krc PUBLIC -DNO_UCONTEXT)
+    target_compile_options(krc PUBLIC -D_XOPEN_SOURCE -Wno-deprecated-declarations)
 endif()

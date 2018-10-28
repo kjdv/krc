@@ -1,5 +1,3 @@
-#ifndef NO_UCONTEXT
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <executor.hh>
@@ -56,5 +54,3 @@ TEST_F(executor_test, parallel)
 
 }
 }
-
-#endif

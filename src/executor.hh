@@ -5,7 +5,10 @@
 
 namespace krc {
 
-enum { DEFAULT_STACK_SIZE = 16384};
+enum {
+    DEFAULT_STACK_SIZE = 1<<15,
+    MIN_STACK_SIZE = 1<<15, // less than this does not play well on mac osx (todo: allow this to be smaller on other platforms)
+};
 
 class executor
 {
