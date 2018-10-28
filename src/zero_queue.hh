@@ -31,11 +31,11 @@ private:
 
   bool can_pop() const;
 
-  std::optional<T>        d_item;
-  mutable mutex      d_mutex;
+  std::optional<T>            d_item;
+  mutable mutex               d_mutex;
   std::condition_variable_any d_can_push;
   std::condition_variable_any d_can_pop;
-  bool                    d_closed{false};
+  bool                        d_closed{false};
 };
 
 template <typename T>

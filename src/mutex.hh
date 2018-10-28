@@ -7,17 +7,17 @@ namespace krc {
 class mutex
 {
 public:
-    explicit mutex();
+  explicit mutex();
 
-    void lock();
+  void lock();
 
-    void unlock();
+  void unlock();
 
-    bool try_lock();
+  bool try_lock();
 
 private:
-    std::mutex d_base;
-    bool d_held{false};
+  std::mutex d_base;
+  bool       d_held{false};
 };
 
-}
+} // namespace krc

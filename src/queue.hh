@@ -40,10 +40,10 @@ private:
   size_t        d_max_size;
   std::queue<T> d_base;
 
-  mutable mutex      d_mutex;
+  mutable mutex               d_mutex;
   std::condition_variable_any d_not_full;
   std::condition_variable_any d_not_empty;
-  bool                    d_closed{false};
+  bool                        d_closed{false};
 };
 
 template <typename T>

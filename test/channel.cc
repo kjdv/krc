@@ -1,7 +1,7 @@
 #include <channel.hh>
+#include <executor.hh>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <executor.hh>
 #include <vector>
 
 namespace krc {
@@ -16,24 +16,24 @@ TEST(channel, resolved_to_unbuffered_by_default)
 
   vector<int> items;
 
-  auto push = [&]{
-      ch.push(1);
-      ch.push(2);
-      ch.push(3);
-      ch.close();
+  auto push = [&] {
+    ch.push(1);
+    ch.push(2);
+    ch.push(3);
+    ch.close();
   };
-  auto pop = [&]{
-      while(true)
-      {
-        auto p = ch.pop();
-        if(!p.has_value())
-          return;
+  auto pop = [&] {
+    while(true)
+    {
+      auto p = ch.pop();
+      if(!p.has_value())
+        return;
 
-        items.push_back(p.value());
-      }
+      items.push_back(p.value());
+    }
   };
 
-  auto &exec = executor::instance();
+  auto& exec = executor::instance();
   exec.push(push);
   exec.push(pop);
   exec.run();
