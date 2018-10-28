@@ -137,16 +137,10 @@ executor::executor()
   g_execute = [=](int routine_id) { d_pimpl->execute(routine_id); };
 }
 
-void executor::push(const std::function<void()>& target, size_t stack_size)
+void executor::dispatch(const std::function<void()>& target, size_t stack_size)
 {
   assert(d_pimpl);
   d_pimpl->push(target, stack_size);
-}
-
-void executor::run()
-{
-  assert(d_pimpl);
-  d_pimpl->run();
 }
 
 void executor::run(const std::function<void()>& target, size_t stack_size)

@@ -13,9 +13,7 @@ public:
 
   static executor& instance();
 
-  void push(const std::function<void()>& target, size_t stack_size);
-
-  void run();
+  void dispatch(const std::function<void()>& target, size_t stack_size);
 
   void run(const std::function<void()>& target, size_t stack_size);
 
