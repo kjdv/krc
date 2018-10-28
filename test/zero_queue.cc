@@ -1,8 +1,8 @@
-#include <zero_queue.hh>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <thread>
 #include <vector>
+#include <zero_queue.hh>
 
 namespace krc {
 namespace {
@@ -13,17 +13,17 @@ using namespace testing;
 class zero_queue_test : public Test
 {
 public:
-  vector<int> sink;
+  vector<int>     sink;
   zero_queue<int> zq;
 
   void SetUp() override
   {
-    d_thr = thread([=]{
+    d_thr = thread([=] {
       while(true)
       {
         auto p = zq.pop();
 
-        if (!p.has_value())
+        if(!p.has_value())
           return;
 
         sink.push_back(p.value());
@@ -64,5 +64,5 @@ TEST_F(zero_queue_test, push_on_closed_raises)
   EXPECT_THROW(zq.push(1), channel_closed);
 }
 
-}
-}
+} // namespace
+} // namespace krc

@@ -8,7 +8,7 @@ namespace {
 
 void bar()
 {
-  for (int i = 0; i < 10; ++i)
+  for(int i = 0; i < 10; ++i)
   {
     cout << "bar " << i << endl;
     executor::instance().yield();
@@ -21,7 +21,7 @@ void foo()
 {
   executor::instance().push(bar);
 
-  for (int i = 0; i < 10; ++i)
+  for(int i = 0; i < 10; ++i)
   {
     cout << "foo " << i << endl;
     executor::instance().yield();
@@ -30,11 +30,11 @@ void foo()
   cout << "foo done" << endl;
 }
 
-}
+} // namespace
 
 int main()
 {
-  auto &exec = executor::instance();
+  auto& exec = executor::instance();
   exec.run(foo);
 
   cout << "all done" << endl;

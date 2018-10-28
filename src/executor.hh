@@ -7,8 +7,8 @@
 namespace krc {
 
 enum {
-    DEFAULT_STACK_SIZE = 1<<15,
-    MIN_STACK_SIZE = MINSIGSTKSZ,
+  DEFAULT_STACK_SIZE = 1 << 15,
+  MIN_STACK_SIZE     = MINSIGSTKSZ,
 };
 
 static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
@@ -16,16 +16,16 @@ static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
 class executor
 {
 public:
-  executor(const executor &) = delete;
-  executor &operator=(const executor &) = delete;
+  executor(const executor&) = delete;
+  executor& operator=(const executor&) = delete;
 
-  static executor &instance();
+  static executor& instance();
 
-  void push(const std::function<void()> &target, size_t stack_size = DEFAULT_STACK_SIZE);
+  void push(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
 
   void run();
 
-  void run(const std::function<void()> &target, size_t stack_size = DEFAULT_STACK_SIZE);
+  void run(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
 
   void yield();
 
@@ -38,4 +38,4 @@ private:
   static executor s_instance;
 };
 
-}
+} // namespace krc

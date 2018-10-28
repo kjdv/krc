@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <executor.hh>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 namespace krc {
 namespace {
@@ -12,7 +12,7 @@ class executor_test : public Test
 {
 public:
   vector<int> events;
-  executor &exec = executor::instance();
+  executor&   exec = executor::instance();
 
   std::function<void()> emitter(int start, int end, bool interrupt = false)
   {
@@ -52,5 +52,5 @@ TEST_F(executor_test, parallel)
   EXPECT_THAT(events, ElementsAre(0, 3, 1, 4, 2, 5));
 }
 
-}
-}
+} // namespace
+} // namespace krc

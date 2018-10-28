@@ -10,4 +10,4 @@ public:
   using std::logic_error::logic_error;
 };
 
-}
+} // namespace krc

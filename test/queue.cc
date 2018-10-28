@@ -1,6 +1,6 @@
-#include <queue.hh>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <queue.hh>
 #include <thread>
 #include <vector>
 
@@ -23,11 +23,11 @@ TEST(queue, push_beyond_max)
 {
   enum { N = 10 };
 
-  queue<int> q(3);
+  queue<int>       q(3);
   std::vector<int> items;
 
-  std::thread t([&]{
-    for (int i = 0; i < N; ++i)
+  std::thread t([&] {
+    for(int i = 0; i < N; ++i)
       items.push_back(q.pop().value());
   });
 
@@ -39,16 +39,15 @@ TEST(queue, push_beyond_max)
   EXPECT_THAT(items, testing::ElementsAre(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
 }
 
-
 TEST(queue, pop_on_closed_returns_none)
 {
   enum { N = 10 };
 
-  queue<int> q(3);
+  queue<int>                      q(3);
   std::vector<std::optional<int>> items;
 
-  std::thread t([&]{
-    for (int i = 0; i < N; ++i)
+  std::thread t([&] {
+    for(int i = 0; i < N; ++i)
       items.push_back(q.pop());
   });
 
@@ -101,5 +100,5 @@ TEST(queue, empty_indicator)
   EXPECT_TRUE(q.empty());
 }
 
-}
-}
+} // namespace
+} // namespace krc

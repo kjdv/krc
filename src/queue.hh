@@ -1,10 +1,10 @@
 #pragma once
 
-#include <queue>
-#include <mutex>
-#include <condition_variable>
-#include <optional>
 #include <cassert>
+#include <condition_variable>
+#include <mutex>
+#include <optional>
+#include <queue>
 
 #include "closed_exception.hh"
 
@@ -22,7 +22,7 @@ public:
 
   size_t max_size() const;
 
-  void push(T && item);
+  void push(T&& item);
 
   std::optional<T> pop();
 
@@ -37,13 +37,13 @@ private:
 
   bool not_empty() const;
 
-  size_t d_max_size;
+  size_t        d_max_size;
   std::queue<T> d_base;
 
-  mutable std::mutex d_mutex;
+  mutable std::mutex      d_mutex;
   std::condition_variable d_not_full;
   std::condition_variable d_not_empty;
-  bool d_closed{false};
+  bool                    d_closed{false};
 };
 
 template <typename T>
@@ -60,10 +60,10 @@ size_t queue<T>::max_size() const
 }
 
 template <typename T>
-void queue<T>::push(T && item)
+void queue<T>::push(T&& item)
 {
   lock_t l(d_mutex);
-  d_not_full.wait(l, [=]{ return closed() || this->not_full(); });
+  d_not_full.wait(l, [=] { return closed() || this->not_full(); });
 
   if(closed())
     throw channel_closed("push on a closed channel");
@@ -79,7 +79,7 @@ std::optional<T> queue<T>::pop()
 {
   lock_t l(d_mutex);
 
-  d_not_empty.wait(l, [=]{ return closed() || this->not_empty(); });
+  d_not_empty.wait(l, [=] { return closed() || this->not_empty(); });
 
   if(!not_empty())
     return std::optional<T>();
@@ -136,4 +136,4 @@ bool queue<T>::empty() const
   return d_base.empty();
 }
 
-}
+} // namespace krc

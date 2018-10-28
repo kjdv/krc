@@ -1,18 +1,17 @@
 #include "executor.hh"
 #include <cassert>
-#include <ucontext.h>
 #include <map>
-#include <vector>
 #include <queue>
+#include <ucontext.h>
+#include <vector>
 
 using namespace std;
 
 namespace krc {
 
-
 // weird control ping-poing needed because makecontext targets need c-linkage
 std::function<void(int)> g_execute;
-void run_target(int routine_id)
+void                     run_target(int routine_id)
 {
   g_execute(routine_id);
 }
@@ -20,23 +19,23 @@ void run_target(int routine_id)
 class executor::impl
 {
 public:
-  void push(const function<void ()> &target, size_t stack_size)
+  void push(const function<void()>& target, size_t stack_size)
   {
     assert(stack_size >= MIN_STACK_SIZE);
 
-    int routine_id = d_targets.empty() ? 0 : d_targets.rbegin()->first + 1;
-    auto it = d_targets.emplace(std::piecewise_construct,
+    int  routine_id = d_targets.empty() ? 0 : d_targets.rbegin()->first + 1;
+    auto it         = d_targets.emplace(std::piecewise_construct,
                                 std::forward_as_tuple(routine_id),
                                 std::forward_as_tuple(target, stack_size));
     assert(it.second);
 
     ucontext_t ctx;
     getcontext(&ctx);
-    ctx.uc_stack.ss_sp = it.first->second.stack.data();
-    ctx.uc_stack.ss_size = stack_size;
+    ctx.uc_stack.ss_sp    = it.first->second.stack.data();
+    ctx.uc_stack.ss_size  = stack_size;
     ctx.uc_stack.ss_flags = 0;
-    ctx.uc_link = 0;
-    makecontext(&ctx, (void (*)())&run_target, 1, routine_id);
+    ctx.uc_link           = 0;
+    makecontext(&ctx, (void (*)()) & run_target, 1, routine_id);
 
     d_routines.push(ctx);
   }
@@ -56,7 +55,7 @@ public:
 
   void run()
   {
-    if (!d_routines.empty())
+    if(!d_routines.empty())
     {
       ucontext_t ctx = d_routines.front();
       d_routines.pop();
@@ -65,7 +64,7 @@ public:
     }
   }
 
-  void run(const function<void ()> &target, size_t stack_size)
+  void run(const function<void()>& target, size_t stack_size)
   {
     push(target, stack_size);
     run();
@@ -73,7 +72,7 @@ public:
 
   void yield()
   {
-    if (!d_routines.empty())
+    if(!d_routines.empty())
     {
       d_routines.emplace();
 
@@ -107,15 +106,16 @@ private:
   struct target_t
   {
     std::function<void()> target;
-    std::vector<char> stack;
+    std::vector<char>     stack;
 
-    target_t(const std::function<void()> &target_, size_t stack_size)
+    target_t(const std::function<void()>& target_, size_t stack_size)
       : target(target_)
       , stack(stack_size)
-    {}
+    {
+    }
 
-    target_t(const target_t &) = delete;
-    target_t &operator=(const target_t &) = delete;
+    target_t(const target_t&) = delete;
+    target_t& operator=(const target_t&) = delete;
   };
 
   std::map<int, target_t> d_targets;
@@ -123,7 +123,7 @@ private:
 
 executor executor::s_instance;
 
-executor &executor::instance()
+executor& executor::instance()
 {
   return s_instance;
 }
@@ -131,10 +131,10 @@ executor &executor::instance()
 executor::executor()
   : d_pimpl(new impl)
 {
-  g_execute = [=](int routine_id){ d_pimpl->execute(routine_id); };
+  g_execute = [=](int routine_id) { d_pimpl->execute(routine_id); };
 }
 
-void executor::push(const std::function<void ()> &target, size_t stack_size)
+void executor::push(const std::function<void()>& target, size_t stack_size)
 {
   assert(d_pimpl);
   d_pimpl->push(target, stack_size);
@@ -146,7 +146,7 @@ void executor::run()
   d_pimpl->run();
 }
 
-void executor::run(const std::function<void ()> &target, size_t stack_size)
+void executor::run(const std::function<void()>& target, size_t stack_size)
 {
   assert(d_pimpl);
   d_pimpl->run(target, stack_size);
@@ -158,4 +158,4 @@ void executor::yield()
   d_pimpl->yield();
 }
 
-}
+} // namespace krc
