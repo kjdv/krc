@@ -56,8 +56,6 @@ void bar()
   }
 }
 
-ucontext_t main_ctx;
-
 void push_foo()
 {
   static char stack[16384];
