@@ -23,13 +23,16 @@ public:
   void push(const function<void ()> &target, size_t stack_size)
   {
     int routine_id = d_targets.empty() ? 0 : d_targets.rbegin()->first + 1;
-    auto it = d_targets.emplace(routine_id, target_t{target, stack_size});
+    auto it = d_targets.emplace(std::piecewise_construct,
+                                std::forward_as_tuple(routine_id),
+                                std::forward_as_tuple(target, stack_size));
     assert(it.second);
 
     ucontext_t ctx;
     getcontext(&ctx);
     ctx.uc_stack.ss_sp = it.first->second.stack.data();
     ctx.uc_stack.ss_size = stack_size;
+    ctx.uc_stack.ss_flags = 0;
     ctx.uc_link = 0;
     makecontext(&ctx, (void (*)())&run_target, 1, routine_id);
 
@@ -108,6 +111,9 @@ private:
       : target(target_)
       , stack(stack_size)
     {}
+
+    target_t(const target_t &) = delete;
+    target_t &operator=(const target_t &) = delete;
   };
 
   std::map<int, target_t> d_targets;
