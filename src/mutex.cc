@@ -10,7 +10,15 @@ void mutex::lock()
 {
     auto &exec = executor::instance();
     while (!try_lock())
-        exec.yield();
+    {
+        if(!exec.yield())
+        {
+            // when there is nothing to yield to, save on battery and a regular lock
+            std::lock_guard<std::mutex> l(d_base);
+            d_held = true;
+            return;
+        }
+    }
 }
 
 void mutex::unlock()

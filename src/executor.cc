@@ -70,7 +70,7 @@ public:
     run();
   }
 
-  void yield()
+  bool yield()
   {
     if(!d_routines.empty())
     {
@@ -80,7 +80,10 @@ public:
       d_routines.pop();
 
       swapcontext(&d_routines.back(), &new_ctx);
+
+      return true;
     }
+    return false;
   }
 
 private:
@@ -152,10 +155,10 @@ void executor::run(const std::function<void()>& target, size_t stack_size)
   d_pimpl->run(target, stack_size);
 }
 
-void executor::yield()
+bool executor::yield()
 {
   assert(d_pimpl);
-  d_pimpl->yield();
+  return d_pimpl->yield();
 }
 
 } // namespace krc

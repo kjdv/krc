@@ -27,7 +27,8 @@ public:
 
   void run(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
 
-  void yield();
+  // returns true if control was yielded, false if this could not be done (no other routines waiting)
+  bool yield();
 
 private:
   executor();
