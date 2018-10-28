@@ -60,6 +60,12 @@ public:
     }
   }
 
+  void run(const function<void ()> &target, size_t stack_size)
+  {
+    push(target, stack_size);
+    run();
+  }
+
   void yield()
   {
     if (!d_routines.empty())
@@ -130,6 +136,12 @@ void executor::run()
 {
   assert(d_pimpl);
   d_pimpl->run();
+}
+
+void executor::run(const std::function<void ()> &target, size_t stack_size)
+{
+  assert(d_pimpl);
+  d_pimpl->run(target, stack_size);
 }
 
 void executor::yield()

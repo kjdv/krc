@@ -1,5 +1,5 @@
 add_executable(krc_test
-  channel.cc
+  executor.cc
 )
 target_link_libraries(krc_test krc gtest)
 

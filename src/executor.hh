@@ -19,6 +19,8 @@ public:
 
   void run();
 
+  void run(const std::function<void()> &target, size_t stack_size = DEFAULT_STACK_SIZE);
+
   void yield();
 
 private:

@@ -6,17 +6,6 @@ using namespace std;
 
 namespace {
 
-void foo()
-{
-  for (int i = 0; i < 10; ++i)
-  {
-    cout << "foo " << i << endl;
-    executor::instance().yield();
-  }
-
-  cout << "foo done" << endl;
-}
-
 void bar()
 {
   for (int i = 0; i < 10; ++i)
@@ -28,15 +17,25 @@ void bar()
   cout << "bar done" << endl;
 }
 
+void foo()
+{
+  executor::instance().push(bar);
+
+  for (int i = 0; i < 10; ++i)
+  {
+    cout << "foo " << i << endl;
+    executor::instance().yield();
+  }
+
+  cout << "foo done" << endl;
+}
+
 }
 
 int main()
 {
   auto &exec = executor::instance();
-
-  exec.push(foo);
-  exec.push(bar);
-  exec.run();
+  exec.run(foo);
 
   cout << "all done" << endl;
 
