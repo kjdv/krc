@@ -5,34 +5,20 @@
 
 using namespace std;
 
-struct context
-{
-  shared_ptr<ucontext_t> ctx;
-  bool needs_push{true};
-
-  context()
-    : ctx(make_shared<ucontext_t>())
-  {}
-};
-
-queue<context> g_context_queue;
+queue<ucontext_t> g_context_queue;
 
 void yield()
 {
   cout << "yielding" << endl;
 
   if (!g_context_queue.empty()) {
-    context ctx;
-    g_context_queue.push(ctx);
+    g_context_queue.emplace();
 
-    context new_ctx = g_context_queue.front();
+    ucontext_t new_ctx = g_context_queue.front();
     g_context_queue.pop();
 
-    swapcontext(ctx.ctx.get(), new_ctx.ctx.get());
+    swapcontext(&g_context_queue.back(), &new_ctx);
   }
-
-  return;
-
 }
 
 void join()
@@ -40,11 +26,10 @@ void join()
   cout << "joining" << endl;
   while(!g_context_queue.empty())
   {
-    context new_ctx = g_context_queue.front();
+    ucontext_t new_ctx = g_context_queue.front();
     g_context_queue.pop();
-    setcontext(new_ctx.ctx.get());
+    setcontext(&new_ctx);
   }
-   // yield();
 }
 
 void foo()
@@ -71,13 +56,13 @@ void push_foo()
 {
   static char stack[16384];
 
-  context ctx;
-  getcontext(ctx.ctx.get());
-  ctx.ctx->uc_stack.ss_sp = stack;
-  ctx.ctx->uc_stack.ss_size = 16384;
-  ctx.ctx->uc_stack.ss_flags = 0;
-  ctx.ctx->uc_link = 0;
-  makecontext(ctx.ctx.get(), &foo, 0);
+  ucontext_t ctx;
+  getcontext(&ctx);
+  ctx.uc_stack.ss_sp = stack;
+  ctx.uc_stack.ss_size = 16384;
+  ctx.uc_stack.ss_flags = 0;
+  ctx.uc_link = 0;
+  makecontext(&ctx, &foo, 0);
 
   g_context_queue.push(ctx);
 }
@@ -86,22 +71,22 @@ void push_bar()
 {
   static char stack[16384];
 
-  context ctx;
-  getcontext(ctx.ctx.get());
-  ctx.ctx->uc_stack.ss_sp = stack;
-  ctx.ctx->uc_stack.ss_size = 16384;
-  ctx.ctx->uc_stack.ss_flags = 0;
-  ctx.ctx->uc_link = 0;
-  makecontext(ctx.ctx.get(), &bar, 0);
+  ucontext_t ctx;
+  getcontext(&ctx);
+  ctx.uc_stack.ss_sp = stack;
+  ctx.uc_stack.ss_size = 16384;
+  ctx.uc_stack.ss_flags = 0;
+  ctx.uc_link = 0;
+  makecontext(&ctx, &bar, 0);
 
   g_context_queue.push(ctx);
 }
 
 
 void run() {
-  context new_ctx = g_context_queue.front();
+  ucontext_t new_ctx = g_context_queue.front();
   g_context_queue.pop();
-  swapcontext(&main_ctx, new_ctx.ctx.get());
+  swapcontext(&main_ctx, &new_ctx);
   join();
 
   setcontext(&main_ctx);
