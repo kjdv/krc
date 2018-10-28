@@ -72,14 +72,6 @@ TEST(queue, push_on_closed_raises)
   EXPECT_THROW(q.push(1), queue_closed);
 }
 
-TEST(queue, closed_indicator)
-{
-  queue<int> q(1);
-  EXPECT_FALSE(q.closed());
-  q.close();
-  EXPECT_TRUE(q.closed());
-}
-
 TEST(queue, size_indicator)
 {
   queue<int> q(3);

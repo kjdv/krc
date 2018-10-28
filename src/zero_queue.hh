@@ -19,8 +19,6 @@ class zero_queue
 public:
   explicit zero_queue();
 
-  bool closed() const;
-
   void push(T && item);
 
   std::optional<T> pop();
@@ -109,13 +107,6 @@ void zero_queue<T>::close()
 template <typename T>
 bool zero_queue<T>::is_closed() const
 {
-  return d_closed;
-}
-
-template <typename T>
-bool zero_queue<T>::closed() const
-{
-  lock_t l(d_mutex);
   return d_closed;
 }
 

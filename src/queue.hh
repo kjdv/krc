@@ -21,8 +21,6 @@ class queue
 public:
   explicit queue(size_t max_size);
 
-  bool closed() const;
-
   size_t size() const;
 
   bool empty() const;
@@ -38,7 +36,7 @@ public:
 private:
   typedef std::unique_lock<std::mutex> lock_t;
 
-  bool is_closed() const;
+  bool closed() const;
 
   bool not_full() const;
 
@@ -70,9 +68,9 @@ template <typename T>
 void queue<T>::push(T && item)
 {
   lock_t l(d_mutex);
-  d_not_full.wait(l, [=]{ return is_closed() || this->not_full(); });
+  d_not_full.wait(l, [=]{ return closed() || this->not_full(); });
 
-  if(is_closed())
+  if(closed())
     throw queue_closed("push on a closed queue");
 
   d_base.emplace(std::forward<T>(item));
@@ -86,7 +84,7 @@ std::optional<T> queue<T>::pop()
 {
   lock_t l(d_mutex);
 
-  d_not_empty.wait(l, [=]{ return is_closed() || this->not_empty(); });
+  d_not_empty.wait(l, [=]{ return closed() || this->not_empty(); });
 
   if(!not_empty())
     return std::optional<T>();
@@ -124,15 +122,8 @@ void queue<T>::close()
 }
 
 template <typename T>
-bool queue<T>::is_closed() const
-{
-  return d_closed;
-}
-
-template <typename T>
 bool queue<T>::closed() const
 {
-  lock_t l(d_mutex);
   return d_closed;
 }
 
