@@ -3,6 +3,8 @@ add_library(krc
     channel.cc
     executor.hh
     executor.cc
+    queue.hh
+    queue.cc
 )
 target_include_directories(krc
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
