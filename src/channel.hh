@@ -25,6 +25,8 @@ private:
   class unbuffered;
   class buffered;
 
+  static std::shared_ptr<impl> make_impl(size_t queue_size);
+
   std::shared_ptr<impl> d_pimpl;
 };
 
@@ -93,10 +95,17 @@ private:
 };
 
 template <typename T>
+std::shared_ptr<typename channel<T>::impl> channel<T>::make_impl(size_t queue_size)
+{
+    if (queue_size)
+        return std::make_shared<channel<T>::buffered>(queue_size);
+    else
+        return std::make_shared<channel<T>::unbuffered>();
+}
+
+template <typename T>
 channel<T>::channel(size_t queue_size)
-  : d_pimpl(queue_size
-            ? std::make_shared<channel<T>::buffered>(queue_size)
-            : std::make_shared<channel<T>::unbuffered>())
+  : d_pimpl(make_impl(queue_size))
 {}
 
 template <typename T>

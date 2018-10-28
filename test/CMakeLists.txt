@@ -1,4 +1,5 @@
 add_executable(krc_test
+  channel.cc
   executor.cc
   queue.cc
   zero_queue.cc
