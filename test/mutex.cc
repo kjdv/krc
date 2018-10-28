@@ -1,4 +1,4 @@
-#include <executor.hh>
+#include <runtime.hh>
 #include <gtest/gtest.h>
 #include <mutex.hh>
 
@@ -16,12 +16,10 @@ TEST(mutex, try_lock)
 
 TEST(mutex, lock_unlock)
 {
-  auto& exec = executor::instance();
-
   mutex m;
   m.lock();
 
-  exec.run([&] {
+  krc::run([&] {
     m.unlock();
   });
 
@@ -31,19 +29,16 @@ TEST(mutex, lock_unlock)
 
 TEST(mutex, lock_yields_when_held)
 {
-  auto& exec = executor::instance();
 
   mutex m;
   m.lock();
 
-  exec.push([&] {
+  krc::dispatch([&] {
     m.lock();
   });
-  exec.push([&] {
+  krc::run([&] {
     m.unlock();
   });
-
-  exec.run();
 
   EXPECT_FALSE(m.try_lock());
 }

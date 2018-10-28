@@ -1,4 +1,4 @@
-#include <executor.hh>
+#include <runtime.hh>
 #include <iostream>
 
 using namespace krc;
@@ -11,7 +11,7 @@ void bar()
   for(int i = 0; i < 10; ++i)
   {
     cout << "bar " << i << endl;
-    executor::instance().yield();
+    krc::yield();
   }
 
   cout << "bar done" << endl;
@@ -19,12 +19,12 @@ void bar()
 
 void foo()
 {
-  executor::instance().push(bar);
+  krc::dispatch(bar);
 
   for(int i = 0; i < 10; ++i)
   {
     cout << "foo " << i << endl;
-    executor::instance().yield();
+    krc::yield();
   }
 
   cout << "foo done" << endl;
@@ -34,8 +34,7 @@ void foo()
 
 int main()
 {
-  auto& exec = executor::instance();
-  exec.run(foo);
+  krc::run(foo);
 
   cout << "all done" << endl;
 

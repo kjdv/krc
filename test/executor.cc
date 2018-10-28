@@ -30,14 +30,14 @@ public:
 
 TEST_F(executor_test, basic_run)
 {
-  exec.run(emitter(0, 3));
+  exec.run(emitter(0, 3), DEFAULT_STACK_SIZE);
   EXPECT_THAT(events, ElementsAre(0, 1, 2));
 }
 
 TEST_F(executor_test, serial)
 {
-  exec.push(emitter(0, 3));
-  exec.push(emitter(3, 6));
+  exec.push(emitter(0, 3), DEFAULT_STACK_SIZE);
+  exec.push(emitter(3, 6), DEFAULT_STACK_SIZE);
   exec.run();
 
   EXPECT_THAT(events, ElementsAre(0, 1, 2, 3, 4, 5));
@@ -45,8 +45,8 @@ TEST_F(executor_test, serial)
 
 TEST_F(executor_test, parallel)
 {
-  exec.push(emitter(0, 3, true));
-  exec.push(emitter(3, 6, true));
+  exec.push(emitter(0, 3, true), DEFAULT_STACK_SIZE);
+  exec.push(emitter(3, 6, true), DEFAULT_STACK_SIZE);
   exec.run();
 
   EXPECT_THAT(events, ElementsAre(0, 3, 1, 4, 2, 5));

@@ -1,5 +1,5 @@
 #include <channel.hh>
-#include <executor.hh>
+#include <runtime.hh>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <vector>
@@ -33,10 +33,8 @@ TEST(channel, resolved_to_unbuffered_by_default)
     }
   };
 
-  auto& exec = executor::instance();
-  exec.push(push);
-  exec.push(pop);
-  exec.run();
+  krc::dispatch(push);
+  krc::run(pop);
 
   EXPECT_THAT(items, ElementsAre(1, 2, 3));
 }

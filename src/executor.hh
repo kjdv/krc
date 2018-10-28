@@ -1,17 +1,9 @@
 #pragma once
 
-#include <functional>
+#include "runtime.hh"
 #include <memory>
-#include <signal.h>
 
 namespace krc {
-
-enum {
-  DEFAULT_STACK_SIZE = 1 << 15,
-  MIN_STACK_SIZE     = MINSIGSTKSZ,
-};
-
-static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
 
 class executor
 {
@@ -21,11 +13,11 @@ public:
 
   static executor& instance();
 
-  void push(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
+  void push(const std::function<void()>& target, size_t stack_size);
 
   void run();
 
-  void run(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
+  void run(const std::function<void()>& target, size_t stack_size);
 
   // returns true if control was yielded, false if this could not be done (no other routines waiting)
   bool yield();

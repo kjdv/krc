@@ -6,6 +6,8 @@ add_library(krc
     mutex.hh
     mutex.cc
     queue.hh
+    runtime.hh
+    runtime.cc
     zero_queue.hh
 )
 target_include_directories(krc
