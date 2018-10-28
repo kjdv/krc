@@ -2,13 +2,16 @@
 
 #include <functional>
 #include <memory>
+#include <signal.h>
 
 namespace krc {
 
 enum {
     DEFAULT_STACK_SIZE = 1<<15,
-    MIN_STACK_SIZE = 1<<15, // less than this does not play well on mac osx (todo: allow this to be smaller on other platforms)
+    MIN_STACK_SIZE = MINSIGSTKSZ,
 };
+
+static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
 
 class executor
 {
