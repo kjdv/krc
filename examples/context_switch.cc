@@ -8,15 +8,6 @@ using namespace std;
 
 queue<ucontext_t> g_context_queue;
 
-void pop()
-{
-  assert(!g_context_queue.empty());
-
-  ucontext_t new_ctx = g_context_queue.front();
-  g_context_queue.pop();
-  setcontext(&new_ctx);
-}
-
 void yield()
 {
   cout << "yielding" << endl;
@@ -35,7 +26,7 @@ void join()
 {
   cout << "joining" << endl;
   while(!g_context_queue.empty())
-    pop();
+    yield();
 }
 
 void foo()
@@ -54,7 +45,11 @@ void bar()
     cout << "bar " << i << endl;
     yield();
   }
+
+  cout << "bar done" << endl;
 }
+
+ucontext_t main_ctx;
 
 void push_foo()
 {
@@ -65,7 +60,7 @@ void push_foo()
   ctx.uc_stack.ss_sp = stack;
   ctx.uc_stack.ss_size = 16384;
   ctx.uc_stack.ss_flags = 0;
-  ctx.uc_link = 0;
+  ctx.uc_link = &main_ctx;
   makecontext(&ctx, &foo, 0);
 
   g_context_queue.push(ctx);
@@ -80,17 +75,30 @@ void push_bar()
   ctx.uc_stack.ss_sp = stack;
   ctx.uc_stack.ss_size = 16384;
   ctx.uc_stack.ss_flags = 0;
-  ctx.uc_link = 0;
+  ctx.uc_link = &main_ctx;
   makecontext(&ctx, &bar, 0);
 
   g_context_queue.push(ctx);
+}
+
+void run()
+{
+  assert(!g_context_queue.empty());
+
+  ucontext_t new_ctx = g_context_queue.front();
+  g_context_queue.pop();
+
+  swapcontext(&main_ctx, &new_ctx);
 }
 
 int main()
 {
   push_foo();
   push_bar();
+  run();
   join();
+
+  cout << "done" << endl;
 
   return 0;
 }
