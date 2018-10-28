@@ -2,11 +2,11 @@
 
 #include <cassert>
 #include <condition_variable>
-#include <mutex>
 #include <optional>
 #include <queue>
 
 #include "closed_exception.hh"
+#include "mutex.hh"
 
 namespace krc {
 
@@ -29,7 +29,7 @@ public:
   void close();
 
 private:
-  typedef std::unique_lock<std::mutex> lock_t;
+  typedef std::unique_lock<mutex> lock_t;
 
   bool closed() const;
 
@@ -40,9 +40,9 @@ private:
   size_t        d_max_size;
   std::queue<T> d_base;
 
-  mutable std::mutex      d_mutex;
-  std::condition_variable d_not_full;
-  std::condition_variable d_not_empty;
+  mutable mutex      d_mutex;
+  std::condition_variable_any d_not_full;
+  std::condition_variable_any d_not_empty;
   bool                    d_closed{false};
 };
 

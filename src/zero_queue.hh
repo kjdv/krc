@@ -1,10 +1,10 @@
 #pragma once
 
 #include <condition_variable>
-#include <mutex>
 #include <optional>
 
 #include "closed_exception.hh"
+#include "mutex.hh"
 
 namespace krc {
 
@@ -21,7 +21,7 @@ public:
   void close();
 
 private:
-  typedef std::unique_lock<std::mutex> lock_t;
+  typedef std::unique_lock<mutex> lock_t;
 
   bool is_closed() const;
 
@@ -32,9 +32,9 @@ private:
   bool can_pop() const;
 
   std::optional<T>        d_item;
-  mutable std::mutex      d_mutex;
-  std::condition_variable d_can_push;
-  std::condition_variable d_can_pop;
+  mutable mutex      d_mutex;
+  std::condition_variable_any d_can_push;
+  std::condition_variable_any d_can_pop;
   bool                    d_closed{false};
 };
 
@@ -47,6 +47,7 @@ template <typename T>
 void zero_queue<T>::push(T&& item)
 {
   lock_t l(d_mutex);
+
   d_can_push.wait(l, [=] { return is_closed() || this->can_push(); });
 
   if(is_closed())

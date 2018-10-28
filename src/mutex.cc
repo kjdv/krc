@@ -8,8 +8,6 @@ mutex::mutex()
 
 void mutex::lock()
 {
-    // todo: this could be an opportunity to auto-detect deadlocks, throw an exception if no other active routines are found
-
     auto &exec = executor::instance();
     while (!try_lock())
         exec.yield();
@@ -17,8 +15,13 @@ void mutex::lock()
 
 void mutex::unlock()
 {
-    std::lock_guard<std::mutex> l(d_base);
-    d_held = false;
+    {
+        std::lock_guard<std::mutex> l(d_base);
+        d_held = false;
+    }
+
+    auto &exec = executor::instance();
+    exec.yield(); // this could well unblock someone else
 }
 
 bool mutex::try_lock()
