@@ -1,11 +1,21 @@
 #include <iostream>
 #include <ucontext.h>
 #include <queue>
-#include <memory>
+#include <functional>
+#include <cassert>
 
 using namespace std;
 
 queue<ucontext_t> g_context_queue;
+
+void pop()
+{
+  assert(!g_context_queue.empty());
+
+  ucontext_t new_ctx = g_context_queue.front();
+  g_context_queue.pop();
+  setcontext(&new_ctx);
+}
 
 void yield()
 {
@@ -25,11 +35,7 @@ void join()
 {
   cout << "joining" << endl;
   while(!g_context_queue.empty())
-  {
-    ucontext_t new_ctx = g_context_queue.front();
-    g_context_queue.pop();
-    setcontext(&new_ctx);
-  }
+    pop();
 }
 
 void foo()
@@ -82,21 +88,11 @@ void push_bar()
   g_context_queue.push(ctx);
 }
 
-
-void run() {
-  ucontext_t new_ctx = g_context_queue.front();
-  g_context_queue.pop();
-  swapcontext(&main_ctx, &new_ctx);
-  join();
-
-  setcontext(&main_ctx);
-}
-
 int main()
 {
   push_foo();
   push_bar();
-  run();
+  join();
 
   return 0;
 }
