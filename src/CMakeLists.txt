@@ -3,6 +3,8 @@ add_library(krc
     closed_exception.hh
     executor.hh
     executor.cc
+    mutex.hh
+    mutex.cc
     queue.hh
     zero_queue.hh
 )
