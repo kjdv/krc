@@ -58,5 +58,11 @@ TEST_F(zero_queue_test, push_pop)
   EXPECT_THAT(sink, ElementsAre(1, 2, 3));
 }
 
+TEST_F(zero_queue_test, push_on_closed_raises)
+{
+  zq.close();
+  EXPECT_THROW(zq.push(1), zero_queue_closed);
+}
+
 }
 }
