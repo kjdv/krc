@@ -1,4 +1,4 @@
-add_executable(context_switch
-    context_switch.cc
+add_executable(executor
+    executor.cc
 )
-target_link_libraries(context_switch krc)
+target_link_libraries(executor krc)
