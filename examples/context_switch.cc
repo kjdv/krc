@@ -36,6 +36,10 @@ void foo()
     cout << "foo " << i << endl;
     yield();
   }
+
+  cout << "foo done" << endl;
+
+  yield();
 }
 
 void bar()
@@ -47,6 +51,8 @@ void bar()
   }
 
   cout << "bar done" << endl;
+
+  yield();
 }
 
 ucontext_t main_ctx;
@@ -96,7 +102,6 @@ int main()
   push_foo();
   push_bar();
   run();
-  join();
 
   cout << "done" << endl;
 
