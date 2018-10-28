@@ -72,5 +72,42 @@ TEST(queue, push_on_closed_raises)
   EXPECT_THROW(q.push(1), queue_closed);
 }
 
+TEST(queue, closed_indicator)
+{
+  queue<int> q(1);
+  EXPECT_FALSE(q.closed());
+  q.close();
+  EXPECT_TRUE(q.closed());
+}
+
+TEST(queue, size_indicator)
+{
+  queue<int> q(3);
+
+  EXPECT_EQ(0, q.size());
+
+  q.push(1);
+  EXPECT_EQ(1, q.size());
+
+  q.push(1);
+  EXPECT_EQ(2, q.size());
+
+  q.pop();
+  EXPECT_EQ(1, q.size());
+
+  q.pop();
+  EXPECT_EQ(0, q.size());
+}
+
+TEST(queue, empty_indicator)
+{
+  queue<int> q(1);
+  EXPECT_TRUE(q.empty());
+  q.push(1);
+  EXPECT_FALSE(q.empty());
+  q.pop();
+  EXPECT_TRUE(q.empty());
+}
+
 }
 }
