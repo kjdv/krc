@@ -17,6 +17,7 @@ public:
 
 private:
     std::mutex d_base;
+    bool d_held{false};
 };
 
 }
