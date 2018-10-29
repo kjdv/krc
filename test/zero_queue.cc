@@ -19,9 +19,13 @@ public:
   void SetUp() override
   {
     d_thr = thread([=] {
-      while(!zq.closed())
+      while(true)
       {
         auto p = zq.pop();
+
+        if(!p.has_value())
+          return;
+
         sink.push_back(p.value());
       }
     });
@@ -58,18 +62,6 @@ TEST_F(zero_queue_test, push_on_closed_raises)
 {
   zq.close();
   EXPECT_THROW(zq.push(1), channel_closed);
-}
-
-TEST_F(zero_queue_test, closed_indicator)
-{
-  zq.push(1);
-  zq.push(2);
-  zq.close();
-
-  join();
-
-  EXPECT_TRUE(zq.closed());
-  EXPECT_THAT(sink, ElementsAre(1, 2));
 }
 
 } // namespace
