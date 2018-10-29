@@ -16,7 +16,7 @@ class zero_queue
 
     void push(T&& item);
 
-    std::optional<T> pop();
+    std::optional<T> pull();
 
     void close();
 
@@ -29,12 +29,12 @@ class zero_queue
 
     bool can_push() const;
 
-    bool can_pop() const;
+    bool can_pull() const;
 
     std::optional<T>            d_item;
     mutable mutex               d_mutex;
     std::condition_variable_any d_can_push;
-    std::condition_variable_any d_can_pop;
+    std::condition_variable_any d_can_pull;
     bool                        d_closed{false};
 };
 
@@ -56,17 +56,17 @@ void zero_queue<T>::push(T&& item)
     d_item = item;
 
     l.unlock();
-    d_can_pop.notify_one();
+    d_can_pull.notify_one();
 }
 
 template <typename T>
-std::optional<T> zero_queue<T>::pop()
+std::optional<T> zero_queue<T>::pull()
 {
     lock_t l(d_mutex);
 
-    d_can_pop.wait(l, [=] { return is_closed() || this->can_pop(); });
+    d_can_pull.wait(l, [=] { return is_closed() || this->can_pull(); });
 
-    if(!can_pop())
+    if(!can_pull())
         return std::optional<T>();
 
     std::optional<T> item;
@@ -85,7 +85,7 @@ bool zero_queue<T>::can_push() const
 }
 
 template <typename T>
-bool zero_queue<T>::can_pop() const
+bool zero_queue<T>::can_pull() const
 {
     return d_item.has_value();
 }
@@ -98,7 +98,7 @@ void zero_queue<T>::close()
     l.unlock();
 
     d_can_push.notify_all();
-    d_can_pop.notify_all();
+    d_can_pull.notify_all();
 }
 
 template <typename T>

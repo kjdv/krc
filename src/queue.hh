@@ -25,7 +25,7 @@ class queue
 
     void push(T&& item);
 
-    std::optional<T> pop();
+    std::optional<T> pull();
 
     void close();
 
@@ -106,7 +106,7 @@ void queue<T>::push(T&& item)
 }
 
 template <typename T>
-std::optional<T> queue<T>::pop()
+std::optional<T> queue<T>::pull()
 {
     lock_t l(d_mutex);
 

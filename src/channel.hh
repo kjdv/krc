@@ -17,7 +17,7 @@ class channel
     void push(T&& item);
     void push(const T& item);
 
-    std::optional<T> pop();
+    std::optional<T> pull();
 
     void close();
 
@@ -41,7 +41,7 @@ class channel<T>::impl
 
     virtual void push(T&& item) = 0;
 
-    virtual std::optional<T> pop() = 0;
+    virtual std::optional<T> pull() = 0;
 
     virtual void close() = 0;
 };
@@ -55,9 +55,9 @@ class channel<T>::unbuffered : public channel<T>::impl
         d_impl.push(std::forward<T>(item));
     }
 
-    std::optional<T> pop() override
+    std::optional<T> pull() override
     {
-        return d_impl.pop();
+        return d_impl.pull();
     }
 
     void close() override
@@ -83,9 +83,9 @@ class channel<T>::buffered : public channel<T>::impl
         d_impl.push(std::forward<T>(item));
     }
 
-    std::optional<T> pop() override
+    std::optional<T> pull() override
     {
-        return d_impl.pop();
+        return d_impl.pull();
     }
 
     void close() override
@@ -127,10 +127,10 @@ void channel<T>::push(const T& item)
 }
 
 template <typename T>
-std::optional<T> channel<T>::pop()
+std::optional<T> channel<T>::pull()
 {
     assert(d_pimpl);
-    return d_pimpl->pop();
+    return d_pimpl->pull();
 }
 
 template <typename T>

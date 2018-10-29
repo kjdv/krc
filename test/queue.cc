@@ -7,16 +7,16 @@
 namespace krc {
 namespace {
 
-TEST(queue, push_pop)
+TEST(queue, push_pull)
 {
     queue<int> q(10);
     q.push(1);
     q.push(2);
     q.push(3);
 
-    EXPECT_EQ(1, q.pop().value());
-    EXPECT_EQ(2, q.pop().value());
-    EXPECT_EQ(3, q.pop().value());
+    EXPECT_EQ(1, q.pull().value());
+    EXPECT_EQ(2, q.pull().value());
+    EXPECT_EQ(3, q.pull().value());
 }
 
 TEST(queue, push_beyond_max)
@@ -28,7 +28,7 @@ TEST(queue, push_beyond_max)
 
     std::thread t([&] {
         for(int i = 0; i < N; ++i)
-            items.push_back(q.pop().value());
+            items.push_back(q.pull().value());
     });
 
     for(int i = 0; i < N; ++i)
@@ -39,7 +39,7 @@ TEST(queue, push_beyond_max)
     EXPECT_THAT(items, testing::ElementsAre(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
 }
 
-TEST(queue, pop_on_closed_returns_none)
+TEST(queue, pull_on_closed_returns_none)
 {
     enum { N = 10 };
 
@@ -48,7 +48,7 @@ TEST(queue, pop_on_closed_returns_none)
 
     std::thread t([&] {
         for(int i = 0; i < N; ++i)
-            items.push_back(q.pop());
+            items.push_back(q.pull());
     });
 
     q.push(1);
@@ -83,10 +83,10 @@ TEST(queue, size_indicator)
     q.push(1);
     EXPECT_EQ(2, q.size());
 
-    q.pop();
+    q.pull();
     EXPECT_EQ(1, q.size());
 
-    q.pop();
+    q.pull();
     EXPECT_EQ(0, q.size());
 }
 
@@ -96,7 +96,7 @@ TEST(queue, empty_indicator)
     EXPECT_TRUE(q.empty());
     q.push(1);
     EXPECT_FALSE(q.empty());
-    q.pop();
+    q.pull();
     EXPECT_TRUE(q.empty());
 }
 

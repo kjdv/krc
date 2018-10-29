@@ -12,7 +12,7 @@ void print(channel<int> ch)
 {
     while(true)
     {
-        auto p = ch.pop();
+        auto p = ch.pull();
 
         if(!p.has_value())
             return;

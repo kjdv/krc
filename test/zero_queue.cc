@@ -21,7 +21,7 @@ class zero_queue_test : public Test
         d_thr = thread([=] {
             while(true)
             {
-                auto p = zq.pop();
+                auto p = zq.pull();
 
                 if(!p.has_value())
                     return;
@@ -47,7 +47,7 @@ class zero_queue_test : public Test
     thread d_thr;
 };
 
-TEST_F(zero_queue_test, push_pop)
+TEST_F(zero_queue_test, push_pull)
 {
     zq.push(1);
     zq.push(2);
