@@ -25,16 +25,14 @@ private:
 
     bool is_closed() const;
 
-    bool available() const;
-
     bool can_push() const;
 
     bool can_pull() const;
 
-    std::optional<T>            d_item;
+    T*                          d_item{nullptr};
     mutable mutex               d_mutex;
-    std::condition_variable_any d_can_push;
-    std::condition_variable_any d_can_pull;
+    std::condition_variable_any d_pull_ready;
+    std::condition_variable_any d_push_ready;
     bool                        d_closed{false};
 };
 
@@ -48,46 +46,34 @@ void zero_queue<T>::push(T&& item)
 {
     lock_t l(d_mutex);
 
-    d_can_push.wait(l, [=] { return is_closed() || this->can_push(); });
+    d_push_ready.wait(l, [this] { return is_closed() || can_push(); });
 
     if(is_closed())
         throw channel_closed("push on a closed channel");
 
-    d_item = item;
+    d_item = &item;
 
     l.unlock();
-    d_can_pull.notify_one();
+    d_pull_ready.notify_one();
 }
 
 template <typename T>
 std::optional<T> zero_queue<T>::pull()
 {
+    d_push_ready.notify_one();
+
     lock_t l(d_mutex);
+    d_pull_ready.wait(l, [this] { return is_closed() || can_pull(); });
 
-    d_can_pull.wait(l, [=] { return is_closed() || this->can_pull(); });
-
-    if(!can_pull())
+    if (d_item == nullptr)
         return std::optional<T>();
 
-    std::optional<T> item;
-    std::swap(item, d_item);
+    T item = *d_item;
+    d_item = nullptr;
 
     l.unlock();
-    d_can_push.notify_one();
 
     return item;
-}
-
-template <typename T>
-bool zero_queue<T>::can_push() const
-{
-    return !d_item.has_value();
-}
-
-template <typename T>
-bool zero_queue<T>::can_pull() const
-{
-    return d_item.has_value();
 }
 
 template <typename T>
@@ -97,8 +83,20 @@ void zero_queue<T>::close()
     d_closed = true;
     l.unlock();
 
-    d_can_push.notify_all();
-    d_can_pull.notify_all();
+    d_push_ready.notify_all();
+    d_pull_ready.notify_all();
+}
+
+template <typename T>
+bool zero_queue<T>::can_push() const
+{
+    return d_item == nullptr;
+}
+
+template <typename T>
+bool zero_queue<T>::can_pull() const
+{
+    return d_item != nullptr;
 }
 
 template <typename T>
