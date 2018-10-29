@@ -1,7 +1,10 @@
 #pragma once
 
 #include "runtime.hh"
-#include <memory>
+#include <map>
+#include <queue>
+#include <ucontext.h>
+#include <vector>
 
 namespace krc {
 
@@ -23,10 +26,30 @@ public:
 private:
     executor();
 
-    class impl;
-    std::unique_ptr<impl> d_pimpl;
-
     static executor s_instance;
+
+    void run();
+
+    void next();
+
+    void execute(int routine_id);
+
+    ucontext_t d_main;
+
+    std::queue<ucontext_t> d_routines;
+
+    struct target_t
+    {
+        std::function<void()> target;
+        std::vector<char>     stack;
+
+        target_t(const std::function<void()>& target_, size_t stack_size);
+
+        target_t(const target_t&) = delete;
+        target_t& operator=(const target_t&) = delete;
+    };
+
+    std::map<int, target_t> d_targets;
 };
 
 } // namespace krc

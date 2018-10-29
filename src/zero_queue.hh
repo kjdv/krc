@@ -65,7 +65,7 @@ std::optional<T> zero_queue<T>::pull()
     lock_t l(d_mutex);
     d_pull_ready.wait(l, [this] { return is_closed() || can_pull(); });
 
-    if (d_item == nullptr)
+    if(d_item == nullptr)
         return std::optional<T>();
 
     T item = *d_item;
