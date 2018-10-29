@@ -23,14 +23,8 @@ TEST(channel, resolved_to_unbuffered_by_default)
         ch.close();
     };
     auto pull = [&] {
-        while(true)
-        {
-            auto p = ch.pull();
-            if(!p.has_value())
-                return;
-
-            items.push_back(p.value());
-        }
+        for(auto p : ch)
+            items.push_back(p);
     };
 
     krc::dispatch(push);
