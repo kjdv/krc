@@ -8,35 +8,35 @@ namespace {
 
 void bar()
 {
-  for(int i = 0; i < 10; ++i)
-  {
-    cout << "bar " << i << endl;
-    krc::yield();
-  }
+    for(int i = 0; i < 10; ++i)
+    {
+        cout << "bar " << i << endl;
+        krc::yield();
+    }
 
-  cout << "bar done" << endl;
+    cout << "bar done" << endl;
 }
 
 void foo()
 {
-  krc::dispatch(bar);
+    krc::dispatch(bar);
 
-  for(int i = 0; i < 10; ++i)
-  {
-    cout << "foo " << i << endl;
-    krc::yield();
-  }
+    for(int i = 0; i < 10; ++i)
+    {
+        cout << "foo " << i << endl;
+        krc::yield();
+    }
 
-  cout << "foo done" << endl;
+    cout << "foo done" << endl;
 }
 
 } // namespace
 
 int main()
 {
-  krc::run(foo);
+    krc::run(foo);
 
-  cout << "all done" << endl;
+    cout << "all done" << endl;
 
-  return 0;
+    return 0;
 }

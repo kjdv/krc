@@ -6,18 +6,18 @@ namespace krc {
 
 class mutex
 {
-public:
-  explicit mutex();
+  public:
+    explicit mutex();
 
-  void lock();
+    void lock();
 
-  void unlock();
+    void unlock();
 
-  bool try_lock();
+    bool try_lock();
 
-private:
-  std::mutex d_base;
-  bool       d_held{false};
+  private:
+    std::mutex d_base;
+    bool       d_held{false};
 };
 
 } // namespace krc

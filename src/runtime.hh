@@ -6,8 +6,8 @@
 namespace krc {
 
 enum {
-  DEFAULT_STACK_SIZE = 1 << 15,
-  MIN_STACK_SIZE     = MINSIGSTKSZ,
+    DEFAULT_STACK_SIZE = 1 << 15,
+    MIN_STACK_SIZE     = MINSIGSTKSZ,
 };
 
 static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
