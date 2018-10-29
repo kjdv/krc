@@ -14,7 +14,7 @@ namespace krc {
 template <typename T>
 class queue
 {
-  public:
+public:
     explicit queue(size_t max_size);
 
     size_t size() const;
@@ -29,7 +29,7 @@ class queue
 
     void close();
 
-  private:
+private:
     typedef std::unique_lock<mutex> lock_t;
 
     bool closed() const;

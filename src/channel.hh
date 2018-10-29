@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iterator>
 #include <memory>
 #include <optional>
 
@@ -11,7 +12,9 @@ namespace krc {
 template <typename T>
 class channel
 {
-  public:
+public:
+    class iterator;
+
     explicit channel(size_t queue_size = 0);
 
     void push(T&& item);
@@ -21,7 +24,11 @@ class channel
 
     void close();
 
-  private:
+    iterator begin();
+
+    iterator end();
+
+private:
     class impl;
     class unbuffered;
     class buffered;
@@ -32,9 +39,64 @@ class channel
 };
 
 template <typename T>
+class channel<T>::iterator : public std::iterator<std::input_iterator_tag, T>
+{
+public:
+    explicit iterator()
+    {
+    }
+
+    explicit iterator(channel<T>* channel)
+        : d_channel(channel)
+    {
+        pull();
+    }
+
+    iterator& operator++()
+    {
+        pull();
+        return *this;
+    }
+
+    iterator operator++(int)
+    {
+        iterator result = *this;
+        ++(*this);
+        return result;
+    }
+
+    bool operator==(const iterator& other)
+    {
+        // the only equality that makes sense is if both iterators point to the end
+        return (!this->d_item.has_value() && !other.d_item.has_value());
+    }
+
+    bool operator!=(const iterator& other)
+    {
+        return !(*this == other);
+    }
+
+    const T& operator*() const
+    {
+        assert(d_item.has_value());
+        return d_item.value();
+    }
+
+private:
+    void pull()
+    {
+        assert(d_channel);
+        d_item = d_channel->pull();
+    }
+
+    channel<T>*      d_channel{nullptr};
+    std::optional<T> d_item;
+};
+
+template <typename T>
 class channel<T>::impl
 {
-  public:
+public:
     virtual ~impl()
     {
     }
@@ -49,7 +111,7 @@ class channel<T>::impl
 template <typename T>
 class channel<T>::unbuffered : public channel<T>::impl
 {
-  public:
+public:
     void push(T&& item) override
     {
         d_impl.push(std::forward<T>(item));
@@ -65,14 +127,14 @@ class channel<T>::unbuffered : public channel<T>::impl
         d_impl.close();
     }
 
-  private:
+private:
     zero_queue<T> d_impl;
 };
 
 template <typename T>
 class channel<T>::buffered : public channel<T>::impl
 {
-  public:
+public:
     explicit buffered(size_t max_size)
         : d_impl(max_size)
     {
@@ -93,7 +155,7 @@ class channel<T>::buffered : public channel<T>::impl
         d_impl.close();
     }
 
-  private:
+private:
     queue<T> d_impl;
 };
 
@@ -138,6 +200,18 @@ void channel<T>::close()
 {
     assert(d_pimpl);
     return d_pimpl->close();
+}
+
+template <typename T>
+typename channel<T>::iterator channel<T>::begin()
+{
+    return iterator(this);
+}
+
+template <typename T>
+typename channel<T>::iterator channel<T>::end()
+{
+    return iterator();
 }
 
 } // namespace krc

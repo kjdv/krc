@@ -11,7 +11,7 @@ namespace krc {
 template <typename T>
 class zero_queue
 {
-  public:
+public:
     explicit zero_queue();
 
     void push(T&& item);
@@ -20,7 +20,7 @@ class zero_queue
 
     void close();
 
-  private:
+private:
     typedef std::unique_lock<mutex> lock_t;
 
     bool is_closed() const;

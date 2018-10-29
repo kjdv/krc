@@ -6,7 +6,7 @@ namespace krc {
 
 class channel_closed : public std::logic_error
 {
-  public:
+public:
     using std::logic_error::logic_error;
 };
 

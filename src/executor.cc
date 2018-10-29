@@ -18,7 +18,7 @@ void                     run_target(int routine_id)
 
 class executor::impl
 {
-  public:
+public:
     void push(const function<void()>& target, size_t stack_size)
     {
         assert(stack_size >= MIN_STACK_SIZE);
@@ -88,7 +88,7 @@ class executor::impl
         return false;
     }
 
-  private:
+private:
     void next()
     {
         if(d_routines.empty())

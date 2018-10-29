@@ -51,5 +51,20 @@ TEST(channel, resolve_to_buffered_on_nonzero_queue_size)
     EXPECT_EQ(3, ch.pull().value());
 }
 
+TEST(channel, range_support)
+{
+    channel<int> ch(3);
+    ch.push(1);
+    ch.push(2);
+    ch.push(3);
+    ch.close();
+
+    vector<int> items;
+    for(auto i : ch)
+        items.push_back(i);
+
+    EXPECT_THAT(items, ElementsAre(1, 2, 3));
+}
+
 } // namespace
 } // namespace krc

@@ -6,7 +6,7 @@ namespace krc {
 
 class mutex
 {
-  public:
+public:
     explicit mutex();
 
     void lock();
@@ -15,7 +15,7 @@ class mutex
 
     bool try_lock();
 
-  private:
+private:
     std::mutex d_base;
     bool       d_held{false};
 };

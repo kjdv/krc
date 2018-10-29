@@ -1,4 +1,4 @@
-[ ] iterator support for channels
+[x] iterator support for channels
 [ ] configurable switch between ucontext and fcontext from Boost.Context
 [ ] support for informational routine ids
 [ ] io support

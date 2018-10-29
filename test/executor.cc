@@ -10,7 +10,7 @@ using namespace testing;
 
 class executor_test : public Test
 {
-  public:
+public:
     vector<int> events;
     executor&   exec = executor::instance();
 

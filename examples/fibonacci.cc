@@ -10,15 +10,8 @@ namespace {
 
 void print(channel<int> ch)
 {
-    while(true)
-    {
-        auto p = ch.pull();
-
-        if(!p.has_value())
-            return;
-
-        cout << p.value() << endl;
-    }
+    for(auto i : ch)
+        cout << i << endl;
 }
 
 void fibonacci(int n)

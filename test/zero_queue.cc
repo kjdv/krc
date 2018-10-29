@@ -12,7 +12,7 @@ using namespace testing;
 
 class zero_queue_test : public Test
 {
-  public:
+public:
     vector<int>     sink;
     zero_queue<int> zq;
 
@@ -43,7 +43,7 @@ class zero_queue_test : public Test
             d_thr.join();
     }
 
-  private:
+private:
     thread d_thr;
 };
 

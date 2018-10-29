@@ -7,7 +7,7 @@ namespace krc {
 
 class executor
 {
-  public:
+public:
     executor(const executor&) = delete;
     executor& operator=(const executor&) = delete;
 
@@ -20,7 +20,7 @@ class executor
     // returns true if control was yielded, false if this could not be done (no other routines waiting)
     bool yield();
 
-  private:
+private:
     executor();
 
     class impl;
