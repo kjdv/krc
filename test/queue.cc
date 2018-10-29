@@ -100,5 +100,24 @@ TEST(queue, empty_indicator)
   EXPECT_TRUE(q.empty());
 }
 
+TEST(queue, closed_indicator)
+{
+  queue<int> q(10);
+
+  q.push(1);
+  q.push(2);
+  q.push(3);
+
+  q.close();
+
+  EXPECT_FALSE(q.closed());
+  EXPECT_EQ(1, q.pop().value());
+  EXPECT_EQ(2, q.pop().value());
+  EXPECT_EQ(3, q.pop().value());
+
+  EXPECT_TRUE(q.closed());
+  EXPECT_FALSE(q.pop().has_value());
+}
+
 } // namespace
 } // namespace krc

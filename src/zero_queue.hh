@@ -14,6 +14,8 @@ class zero_queue
 public:
   explicit zero_queue();
 
+  bool closed() const;
+
   void push(T&& item);
 
   std::optional<T> pop();
@@ -105,6 +107,13 @@ template <typename T>
 bool zero_queue<T>::is_closed() const
 {
   return d_closed;
+}
+
+template <typename T>
+bool zero_queue<T>::closed() const
+{
+  lock_t l(d_mutex);
+  return !d_item.has_value() && d_closed;
 }
 
 } // namespace krc
