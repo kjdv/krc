@@ -31,9 +31,8 @@ void fibonacci(int n)
     for (int i = 0; i < n; ++i) {
         ch.push(forward<int>(a));
 
-        int t = a;
-        a = b;
-        b = t + b;
+        b = b + a;
+        a = b - a;
     }
 
     ch.close();
