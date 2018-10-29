@@ -35,6 +35,8 @@ public:
     ctx.uc_stack.ss_size  = stack_size;
     ctx.uc_stack.ss_flags = 0;
     ctx.uc_link           = 0;
+    sigemptyset(&ctx.uc_sigmask); // todo: figure out the SIGFPE issue
+    // sigdelset(&ctx.uc_sigmask, SIGFPE);
     makecontext(&ctx, (void (*)()) & run_target, 1, routine_id);
 
     d_routines.push(ctx);
