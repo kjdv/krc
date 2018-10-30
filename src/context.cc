@@ -82,11 +82,10 @@ void context<context_method::UCONTEXT>::free(handle h)
     if (handle && handle != &g_main)
     {
         // clean up ourselves
-        char *sp = handle->stack_ptr;
         handle->~ucontext_handle();
 
         // last bit, free the stack
-        delete [] sp;
+        delete [] reinterpret_cast<char *>(handle);
     }
 }
 
