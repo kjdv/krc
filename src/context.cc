@@ -4,6 +4,8 @@
 #include <csignal>
 #include <cstdarg>
 #include <cassert>
+#include <cerrno>
+#include <iostream>
 
 namespace krc {
 namespace {
@@ -41,7 +43,7 @@ extern "C" void krc_run_target(void *vp)
 }
 
 namespace krc {
-context<context_method::UCONTEXT>::handle make(const target_t &target, size_t stack_size)
+context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::make(const target_t &target, size_t stack_size)
 {
     void *stack = malloc(stack_size + offset);
     ucontext_handle *handle = new(stack) ucontext_handle{ucontext_t{}, target, stack};
@@ -59,8 +61,12 @@ context<context_method::UCONTEXT>::handle make(const target_t &target, size_t st
 
 void context<context_method::UCONTEXT>::swap(handle old_ctx, handle new_ctx)
 {
-    swapcontext(&reinterpret_cast<ucontext_handle *>(old_ctx)->ctx,
-                &reinterpret_cast<ucontext_handle *>(new_ctx)->ctx);
+    ucontext_handle *o = reinterpret_cast<ucontext_handle *>(old_ctx);
+    ucontext_handle *n = reinterpret_cast<ucontext_handle *>(new_ctx);
+
+    int rc = swapcontext(&o->ctx, &n->ctx);
+    std::cout << strerror(errno) << std::endl;
+    assert(rc == 0);
 }
 
 }
