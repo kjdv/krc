@@ -5,7 +5,7 @@
 #include <cassert>
 #include <cerrno>
 #include <iostream>
-#include <cerrno>
+#include <cstring>
 
 extern "C" {
 #include <ucontext.h>
