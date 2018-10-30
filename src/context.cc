@@ -6,12 +6,9 @@
 #include <cerrno>
 #include <iostream>
 #include <cstring>
-
-extern "C" {
 #include <ucontext.h>
-}
 
-static void krc_run_target(void *vp);
+extern "C" void krc_run_target(void *vp);
 
 namespace krc {
 namespace {
@@ -41,6 +38,8 @@ void set_id(const ucontext_handle &h)
 
 context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::make(const target_t &target, size_t stack_size)
 {
+    assert(stack_size >= MINSIGSTKSZ && "stack size too small");
+
     char *stack = new char[stack_size + offset];
     ucontext_handle *handle = new(stack) ucontext_handle{ucontext_t{}, target, stack};
 
