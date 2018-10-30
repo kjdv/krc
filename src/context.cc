@@ -14,11 +14,13 @@ struct ucontext_handle
 {
     ucontext_t ctx;
     target_t target;
-    void *stack_ptr;
+    void *stack_ptr{nullptr};
 };
 
 
 enum { offset = sizeof(ucontext_handle) };
+
+ucontext_handle g_main;
 
 }
 
@@ -54,7 +56,7 @@ context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::mak
 
     sigemptyset(&handle->ctx.uc_sigmask); // todo: figure out the SIGFPE issue
 
-    makecontext(&handle->ctx, (void(*)()) &krc_run_target, 1, handle);
+    makecontext(&handle->ctx, (void(*)()) krc_run_target, 1, handle);
 
     return handle;
 }
@@ -65,8 +67,13 @@ void context<context_method::UCONTEXT>::swap(handle old_ctx, handle new_ctx)
     ucontext_handle *n = reinterpret_cast<ucontext_handle *>(new_ctx);
 
     int rc = swapcontext(&o->ctx, &n->ctx);
-    std::cout << strerror(errno) << std::endl;
     assert(rc == 0);
+}
+
+context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::main()
+{
+    getcontext(&g_main.ctx);
+    return &g_main;
 }
 
 }

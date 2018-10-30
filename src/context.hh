@@ -22,6 +22,8 @@ struct context<context_method::UCONTEXT>
     static handle make(const target_t &target, size_t stack_size);
 
     static void swap(handle old_ctx, handle new_ctx);
+
+    static handle main();
 };
 
 }
