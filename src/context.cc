@@ -20,7 +20,7 @@ struct ucontext_handle
 {
     ucontext_t ctx;
     target_t target;
-    void *stack_ptr{nullptr};
+    char *stack_ptr{nullptr};
 };
 
 
@@ -40,11 +40,11 @@ void set_id(const ucontext_handle &h)
 
 context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::make(const target_t &target, size_t stack_size)
 {
-    void *stack = malloc(stack_size + offset);
+    char *stack = new char[stack_size + offset];
     ucontext_handle *handle = new(stack) ucontext_handle{ucontext_t{}, target, stack};
 
     getcontext(&handle->ctx);
-    handle->ctx.uc_stack.ss_sp = (char *)handle->stack_ptr + offset;
+    handle->ctx.uc_stack.ss_sp = handle->stack_ptr + offset;
     handle->ctx.uc_stack.ss_size = stack_size;
 
     sigemptyset(&handle->ctx.uc_sigmask); // todo: figure out the SIGFPE issue
@@ -82,11 +82,11 @@ void context<context_method::UCONTEXT>::free(handle h)
     if (handle && handle != &g_main)
     {
         // clean up ourselves
-        void *sp = handle->stack_ptr;
+        char *sp = handle->stack_ptr;
         handle->~ucontext_handle();
 
         // last bit, free the stack
-        // free(sp);
+        delete [] sp;
     }
 }
 
