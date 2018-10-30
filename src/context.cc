@@ -76,4 +76,15 @@ context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::mai
     return &g_main;
 }
 
+void context<context_method::UCONTEXT>::release(handle h)
+{
+    if(h != nullptr)
+    {
+        ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(h);
+        void *sp = handle->stack_ptr;
+        handle->~ucontext_handle();
+        free(sp);
+    }
+}
+
 }

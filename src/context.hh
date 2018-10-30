@@ -24,6 +24,8 @@ struct context<context_method::UCONTEXT>
     static void swap(handle old_ctx, handle new_ctx);
 
     static handle main();
+
+    static void release(handle h);
 };
 
 }
