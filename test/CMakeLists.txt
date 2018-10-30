@@ -1,4 +1,5 @@
 add_executable(krc_test
+  context.cc
   channel.cc
   executor.cc
   mutex.cc
