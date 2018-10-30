@@ -1,5 +1,4 @@
 #include <context.hh>
-#include <ucontext.h>
 #include <cstdlib>
 #include <csignal>
 #include <cstdarg>
@@ -7,8 +6,15 @@
 #include <cerrno>
 #include <iostream>
 
+extern "C" {
+#include <ucontext.h>
+
+void krc_run_target(void *vp);
+}
+
 namespace krc {
 namespace {
+
 
 struct ucontext_handle
 {
@@ -22,29 +28,16 @@ enum { offset = sizeof(ucontext_handle) };
 
 ucontext_handle g_main;
 
-}
+thread_local context<context_method::UCONTEXT>::id g_current_id{context<context_method::UCONTEXT>::no_context};
 
-}
-
-extern "C" void krc_run_target(void *vp)
+void set_id(const ucontext_handle &h)
 {
-    using namespace krc;
-
-    ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(vp);
-
-    assert((char *)handle->stack_ptr + krc::offset == handle->ctx.uc_stack.ss_sp);
-
-    handle->target();
-
-    // clean up ourselves
-    void *sp = handle->stack_ptr;
-    handle->~ucontext_handle();
-
-    // last bit, free the stack
-    free(sp);
+    static_assert(sizeof(size_t) == sizeof(void*));
+    g_current_id = reinterpret_cast<context<context_method::UCONTEXT>::id>(h.stack_ptr);
 }
 
-namespace krc {
+}
+
 context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::make(const target_t &target, size_t stack_size)
 {
     void *stack = malloc(stack_size + offset);
@@ -66,25 +59,53 @@ void context<context_method::UCONTEXT>::swap(handle old_ctx, handle new_ctx)
     ucontext_handle *o = reinterpret_cast<ucontext_handle *>(old_ctx);
     ucontext_handle *n = reinterpret_cast<ucontext_handle *>(new_ctx);
 
+    set_id(*n);
     int rc = swapcontext(&o->ctx, &n->ctx);
-    assert(rc == 0);
+
+    if(rc != 0)
+        std::cerr << strerror(errno) << std::endl;
+    assert(rc == 0 && "swapcontext failed");
 }
 
 context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::main()
 {
+    assert(g_current_id == no_context && "main() called from within an active context");
+
     getcontext(&g_main.ctx);
     return &g_main;
 }
 
-void context<context_method::UCONTEXT>::release(handle h)
+void context<context_method::UCONTEXT>::free(handle h)
 {
-    if(h != nullptr)
+    ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(h);
+
+    if (handle && handle != &g_main)
     {
-        ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(h);
+        // clean up ourselves
         void *sp = handle->stack_ptr;
         handle->~ucontext_handle();
-        free(sp);
+
+        // last bit, free the stack
+        // free(sp);
     }
 }
 
+context<context_method::UCONTEXT>::id context<context_method::UCONTEXT>::get_id()
+{
+    return g_current_id;
+}
+
+}
+
+void krc_run_target(void *vp)
+{
+    using namespace krc;
+
+    ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(vp);
+
+    assert((char *)handle->stack_ptr + krc::offset == handle->ctx.uc_stack.ss_sp);
+
+    handle->target();
+
+    assert(false && "routine ended before handing back control to main");
 }
