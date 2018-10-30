@@ -9,9 +9,9 @@
 
 extern "C" {
 #include <ucontext.h>
-
-void krc_run_target(void *vp);
 }
+
+static void krc_run_target(void *vp);
 
 namespace krc {
 namespace {
