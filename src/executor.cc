@@ -7,7 +7,8 @@ namespace krc {
 
 // weird control ping-poing needed because makecontext targets need c-linkage
 std::function<void(int)> g_execute;
-void                     run_target(int routine_id)
+
+void run_target(int routine_id)
 {
     g_execute(routine_id);
 }
