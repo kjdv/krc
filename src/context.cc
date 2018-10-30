@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cerrno>
 #include <iostream>
+#include <cerrno>
 
 extern "C" {
 #include <ucontext.h>
