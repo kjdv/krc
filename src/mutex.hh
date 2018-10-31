@@ -1,14 +1,12 @@
 #pragma once
 
-#include <mutex>
+#include <atomic>
 
 namespace krc {
 
 class mutex
 {
 public:
-    explicit mutex();
-
     void lock();
 
     void unlock();
@@ -16,8 +14,7 @@ public:
     bool try_lock();
 
 private:
-    std::mutex d_base;
-    bool       d_held{false};
+    std::atomic<bool> d_held{false};
 };
 
 } // namespace krc

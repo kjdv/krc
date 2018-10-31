@@ -3,31 +3,21 @@
 
 namespace krc {
 
-mutex::mutex()
-{
-}
-
 void mutex::lock()
 {
     auto& exec = executor::instance();
-    while(!try_lock())
+
+    bool expect = false;
+    while(!d_held.compare_exchange_weak(expect, true))
     {
-        if(!exec.yield())
-        {
-            // when there is nothing to yield to, save on battery and a regular lock
-            std::lock_guard<std::mutex> l(d_base);
-            d_held = true;
-            return;
-        }
+        expect = false;
+        exec.yield();
     }
 }
 
 void mutex::unlock()
 {
-    {
-        std::lock_guard<std::mutex> l(d_base);
-        d_held = false;
-    }
+    d_held.store(false);
 
     auto& exec = executor::instance();
     exec.yield(); // this could well unblock someone else
@@ -35,12 +25,8 @@ void mutex::unlock()
 
 bool mutex::try_lock()
 {
-    std::lock_guard<std::mutex> l(d_base);
-    if(d_held)
-        return false;
-
-    d_held = true;
-    return true;
+    bool expect = false;
+    return d_held.compare_exchange_strong(expect, true);
 }
 
 } // namespace krc
