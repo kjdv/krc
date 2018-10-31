@@ -31,8 +31,8 @@ struct context<context_method::UCONTEXT>
     // create a handle to the main context. it is ub to call this when there is an active context
     static handle main();
 
-    // free resources assosiated with h
-    static void free(handle h);
+    // free resources associated with h
+    static void release(handle h);
 
     // get the id of the current running context
     static id get_id();

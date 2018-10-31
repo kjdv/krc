@@ -15,7 +15,7 @@ public:
     void TearDown() override
     {
         for(auto h : d_handles)
-            context<>::free(h);
+            context<>::release(h);
     }
 
     context<>::handle make(const target_t target)

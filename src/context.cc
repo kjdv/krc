@@ -75,7 +75,7 @@ context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::mai
     return &g_main;
 }
 
-void context<context_method::UCONTEXT>::free(handle h)
+void context<context_method::UCONTEXT>::release(handle h)
 {
     ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(h);
 

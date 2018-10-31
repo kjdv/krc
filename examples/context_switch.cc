@@ -45,9 +45,9 @@ int main()
     cout << "back to main" << " on " << context<>::get_id() << endl;
 
     cout << "freeing up" << endl;
-    context<>::free(bar_ctx);
-    context<>::free(foo_ctx);
-    context<>::free(main_ctx);
+    context<>::release(bar_ctx);
+    context<>::release(foo_ctx);
+    context<>::release(main_ctx);
 
     cout << "all done" << endl;
 
