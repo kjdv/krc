@@ -1,14 +1,15 @@
 #include <context.hh>
 #include <cstdlib>
 #include <csignal>
-#include <cstdarg>
 #include <cassert>
 #include <cerrno>
 #include <iostream>
 #include <cstring>
 #include <ucontext.h>
 
-extern "C" void krc_run_target(void *vp);
+#include "ptr_translate.hh"
+
+extern "C" void krc_run_target(int p1, int p2);
 
 namespace krc {
 namespace {
@@ -30,7 +31,6 @@ thread_local context<context_method::UCONTEXT>::id g_current_id{context<context_
 
 void set_id(const ucontext_handle &h)
 {
-    static_assert(sizeof(size_t) == sizeof(void*));
     g_current_id = reinterpret_cast<context<context_method::UCONTEXT>::id>(h.stack_ptr);
 }
 
@@ -49,7 +49,11 @@ context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::mak
 
     sigemptyset(&handle->ctx.uc_sigmask); // todo: figure out the SIGFPE issue
 
-    makecontext(&handle->ctx, (void(*)()) krc_run_target, 1, handle);
+    // magic to translate a void* into two ints
+    int p1, p2;
+    from_ptr(handle, p1, p2);
+
+    makecontext(&handle->ctx, (void(*)()) krc_run_target, 2, p1, p2);
 
     return handle;
 }
@@ -96,11 +100,12 @@ context<context_method::UCONTEXT>::id context<context_method::UCONTEXT>::get_id(
 
 }
 
-void krc_run_target(void *vp)
+void krc_run_target(int p1, int p2)
 {
     using namespace krc;
 
-    ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(vp);
+    auto hp = to_ptr(p1, p2);
+    ucontext_handle *handle = reinterpret_cast<ucontext_handle *>(hp);
 
     assert((char *)handle->stack_ptr + krc::offset == handle->ctx.uc_stack.ss_sp);
 

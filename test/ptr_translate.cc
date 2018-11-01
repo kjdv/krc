@@ -4,31 +4,16 @@
 namespace krc {
 namespace {
 
-template <typename T>
-void test(void *original)
-{
-    auto ints = from_ptr<T>(original);
-    auto translated = to_ptr(ints);
-
-    EXPECT_EQ(original, translated);
-}
-
-TEST(ptr_as_ints, int16)
+TEST(ptr_as_ints, translate)
 {
     char p = 'a';
-    test<int16_t>(&p);
-}
 
-TEST(ptr_as_ints, int32)
-{
-    char p = 'a';
-    test<int32_t>(&p);
-}
+    int p1, p2;
+    from_ptr(&p, p1, p2);
+    char *np = reinterpret_cast<char *>(to_ptr(p1, p2));
 
-TEST(ptr_as_ints, int64)
-{
-    char p = 'a';
-    test<int64_t>(&p);
+    EXPECT_EQ(&p, np);
+    EXPECT_EQ(p, *np);
 }
 
 }

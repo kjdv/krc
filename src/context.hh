@@ -19,7 +19,7 @@ template <>
 struct context<context_method::UCONTEXT>
 {
     typedef void *handle;
-    typedef size_t id;
+    typedef uintptr_t id;
     constexpr static id no_context = 0;
 
     // creates a new handle

@@ -7,6 +7,7 @@ add_library(krc
     executor.cc
     mutex.hh
     mutex.cc
+    ptr_translate.cc
     ptr_translate.hh
     queue.hh
     runtime.hh
