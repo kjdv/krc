@@ -6,6 +6,7 @@
 #include <ucontext.h>
 #include <vector>
 #include "no_copy.hh"
+#include "context.hh"
 
 namespace krc {
 
@@ -48,6 +49,27 @@ private:
     };
 
     std::map<int, target_t> d_targets;
+};
+
+class executor : private no_copy
+{
+public:
+    static executor_old& instance();
+
+    void dispatch(const std::function<void()>& target, size_t stack_size);
+
+    void run(const std::function<void()>& target, size_t stack_size);
+
+    void yield();
+
+    routine_id get_id();
+
+private:
+    static executor s_instance;
+
+    executor();
+
+    context<>::handle d_main;
 };
 
 } // namespace krc

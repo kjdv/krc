@@ -12,6 +12,8 @@ enum {
 
 static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
 
+typedef uintptr_t routine_id;
+
 // runs the target function as a coroutine. This can be called before or after a call to start()
 void dispatch(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
 
@@ -19,6 +21,8 @@ void dispatch(const std::function<void()>& target, size_t stack_size = DEFAULT_S
 void run(const std::function<void()>& target, size_t stack_size = DEFAULT_STACK_SIZE);
 
 // returns true if control was yielded, false if this could not be done (no other routines waiting)
-bool yield();
+void yield();
+
+routine_id get_id();
 
 } // namespace krc

@@ -15,10 +15,10 @@ void run(const std::function<void()>& target, size_t stack_size)
     exec.run(target, stack_size);
 }
 
-bool yield()
+void yield()
 {
     auto& exec = executor_old::instance();
-    return exec.yield();
+    exec.yield();
 }
 
 } // namespace krc
