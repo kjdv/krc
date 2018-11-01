@@ -3,18 +3,17 @@
 #include <condition_variable>
 #include <optional>
 
-#include "closed_exception.hh"
 #include "mutex.hh"
 
 namespace krc {
 
 template <typename T>
-class zero_queue
+class zero_queue : private no_copy
 {
 public:
     explicit zero_queue();
 
-    void push(T&& item);
+    bool push(T&& item);
 
     std::optional<T> pull();
 
@@ -42,19 +41,21 @@ zero_queue<T>::zero_queue()
 }
 
 template <typename T>
-void zero_queue<T>::push(T&& item)
+bool zero_queue<T>::push(T&& item)
 {
     lock_t l(d_mutex);
 
     d_push_ready.wait(l, [this] { return is_closed() || can_push(); });
 
     if(is_closed())
-        throw channel_closed("push on a closed channel");
+        return false;
 
     d_item = &item;
 
     l.unlock();
     d_pull_ready.notify_one();
+
+    return true;
 }
 
 template <typename T>

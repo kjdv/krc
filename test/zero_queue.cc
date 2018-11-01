@@ -60,8 +60,10 @@ TEST_F(zero_queue_test, push_pull)
 
 TEST_F(zero_queue_test, push_on_closed_raises)
 {
+    EXPECT_TRUE(zq.push(1));
+    zq.pull();
     zq.close();
-    EXPECT_THROW(zq.push(1), channel_closed);
+    EXPECT_FALSE(zq.push(2));
 }
 
 } // namespace

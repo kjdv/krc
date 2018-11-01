@@ -17,15 +17,19 @@ public:
 
     explicit channel(size_t queue_size = 0);
 
-    void push(T&& item);
-    void push(const T& item);
+    // push the item on the channel, returns true on success and false if
+    // the channel is closed and the item could not be pushed
+    bool push(T&& item);
+    bool push(const T& item);
 
+    // pull an item from the channel, returns no value if the channel is closed
     std::optional<T> pull();
 
+    // close the channel
     void close();
 
+    // range support
     iterator begin();
-
     iterator end();
 
 private:
@@ -101,7 +105,7 @@ public:
     {
     }
 
-    virtual void push(T&& item) = 0;
+    virtual bool push(T&& item) = 0;
 
     virtual std::optional<T> pull() = 0;
 
@@ -112,9 +116,9 @@ template <typename T>
 class channel<T>::unbuffered : public channel<T>::impl
 {
 public:
-    void push(T&& item) override
+    bool push(T&& item) override
     {
-        d_impl.push(std::forward<T>(item));
+        return d_impl.push(std::forward<T>(item));
     }
 
     std::optional<T> pull() override
@@ -140,9 +144,9 @@ public:
     {
     }
 
-    void push(T&& item) override
+    bool push(T&& item) override
     {
-        d_impl.push(std::forward<T>(item));
+        return d_impl.push(std::forward<T>(item));
     }
 
     std::optional<T> pull() override
@@ -175,17 +179,17 @@ channel<T>::channel(size_t queue_size)
 }
 
 template <typename T>
-void channel<T>::push(T&& item)
+bool channel<T>::push(T&& item)
 {
     assert(d_pimpl);
-    d_pimpl->push(std::forward<T>(item));
+    return d_pimpl->push(std::forward<T>(item));
 }
 
 template <typename T>
-void channel<T>::push(const T& item)
+bool channel<T>::push(const T& item)
 {
     assert(d_pimpl);
-    d_pimpl->push(T(item)); // only place where this odd duplication is needed, only copy needed
+    return d_pimpl->push(T(item)); // only place where this odd duplication is needed, only copy needed
 }
 
 template <typename T>

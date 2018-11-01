@@ -1,10 +1,11 @@
 #pragma once
 
 #include <atomic>
+#include "no_copy.hh"
 
 namespace krc {
 
-class mutex
+class mutex : private no_copy
 {
 public:
     void lock();
