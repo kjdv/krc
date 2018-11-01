@@ -6,13 +6,12 @@
 #include <queue>
 #include <type_traits>
 
-#include "closed_exception.hh"
 #include "mutex.hh"
 
 namespace krc {
 
 template <typename T>
-class queue
+class queue : private no_copy
 {
 public:
     explicit queue(size_t max_size);
@@ -23,7 +22,7 @@ public:
 
     size_t max_size() const;
 
-    void push(T&& item);
+    bool push(T&& item);
 
     std::optional<T> pull();
 
@@ -91,18 +90,20 @@ size_t queue<T>::max_size() const
 }
 
 template <typename T>
-void queue<T>::push(T&& item)
+bool queue<T>::push(T&& item)
 {
     lock_t l(d_mutex);
     d_not_full.wait(l, [=] { return closed() || this->not_full(); });
 
     if(closed())
-        throw channel_closed("push on a closed channel");
+        return false;
 
     d_base.emplace(std::forward<T>(item));
 
     l.unlock();
     d_not_empty.notify_one();
+
+    return true;
 }
 
 template <typename T>

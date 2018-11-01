@@ -67,8 +67,9 @@ TEST(queue, push_on_closed_raises)
 {
     queue<int> q(10);
 
+    EXPECT_TRUE(q.push(1));
     q.close();
-    EXPECT_THROW(q.push(1), channel_closed);
+    EXPECT_FALSE(q.push(2));
 }
 
 TEST(queue, size_indicator)

@@ -1,10 +1,10 @@
 add_library(krc
     channel.hh
-    closed_exception.hh
     executor.hh
     executor.cc
     mutex.hh
     mutex.cc
+    no_copy.hh
     queue.hh
     runtime.hh
     runtime.cc

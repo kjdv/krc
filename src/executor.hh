@@ -5,15 +5,13 @@
 #include <queue>
 #include <ucontext.h>
 #include <vector>
+#include "no_copy.hh"
 
 namespace krc {
 
-class executor
+class executor : private no_copy
 {
 public:
-    executor(const executor&) = delete;
-    executor& operator=(const executor&) = delete;
-
     static executor& instance();
 
     void dispatch(const std::function<void()>& target, size_t stack_size);
