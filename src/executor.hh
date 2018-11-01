@@ -9,10 +9,10 @@
 
 namespace krc {
 
-class executor : private no_copy
+class executor_old : private no_copy
 {
 public:
-    static executor& instance();
+    static executor_old& instance();
 
     void dispatch(const std::function<void()>& target, size_t stack_size);
 
@@ -22,9 +22,9 @@ public:
     bool yield();
 
 private:
-    executor();
+    executor_old();
 
-    static executor s_instance;
+    static executor_old s_instance;
 
     void run();
 

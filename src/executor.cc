@@ -13,19 +13,19 @@ void run_target(int routine_id)
     g_execute(routine_id);
 }
 
-executor executor::s_instance;
+executor_old executor_old::s_instance;
 
-executor& executor::instance()
+executor_old& executor_old::instance()
 {
     return s_instance;
 }
 
-executor::executor()
+executor_old::executor_old()
 {
     g_execute = [=](int routine_id) { this->execute(routine_id); };
 }
 
-void executor::dispatch(const function<void()>& target, size_t stack_size)
+void executor_old::dispatch(const function<void()>& target, size_t stack_size)
 {
     assert(stack_size >= MIN_STACK_SIZE);
 
@@ -48,7 +48,7 @@ void executor::dispatch(const function<void()>& target, size_t stack_size)
     d_routines.push(ctx);
 }
 
-void executor::execute(int routine_id)
+void executor_old::execute(int routine_id)
 {
     auto it = d_targets.find(routine_id);
     assert(it != d_targets.end());
@@ -61,7 +61,7 @@ void executor::execute(int routine_id)
     next();
 }
 
-void executor::run()
+void executor_old::run()
 {
     if(!d_routines.empty())
     {
@@ -72,13 +72,13 @@ void executor::run()
     }
 }
 
-void executor::run(const function<void()>& target, size_t stack_size)
+void executor_old::run(const function<void()>& target, size_t stack_size)
 {
     dispatch(target, stack_size);
     run();
 }
 
-bool executor::yield()
+bool executor_old::yield()
 {
     if(!d_routines.empty())
     {
@@ -94,7 +94,7 @@ bool executor::yield()
     return false;
 }
 
-void executor::next()
+void executor_old::next()
 {
     if(d_routines.empty())
     {
@@ -109,7 +109,7 @@ void executor::next()
     }
 }
 
-executor::target_t::target_t(const std::function<void()>& target_, size_t stack_size)
+executor_old::target_t::target_t(const std::function<void()>& target_, size_t stack_size)
     : target(target_)
     , stack(stack_size)
 {

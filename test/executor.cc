@@ -12,7 +12,7 @@ class executor_test : public Test
 {
 public:
     vector<int> events;
-    executor&   exec = executor::instance();
+    executor_old&   exec = executor_old::instance();
 
     std::function<void()> emitter(int start, int end, bool interrupt = false)
     {
