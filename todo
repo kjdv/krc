@@ -1,7 +1,7 @@
 [x] iterator support for channels
 [x] light-weight zero-buffer
-[ ] configurable switch between ucontext and fcontext from Boost.Context
-[ ] support for informational routine ids
+[-] (deferred) configurable switch between ucontext and fcontext from Boost.Context
+[x] support for informational routine ids
 [ ] io support
 [ ] threading support
 
