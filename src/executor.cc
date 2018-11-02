@@ -17,23 +17,22 @@ void executor::dispatch(const std::function<void ()> &target, size_t stack_size)
     auto wrapped = [=]{
         target();
         this->next();
+
+        assert(false && "unreachable");
     };
 
     auto handle = context<>::make(wrapped, stack_size);
-    d_waiting.push(handle);
+    d_schedule.push(handle);
 }
 
 void executor::run(const std::function<void ()> &target, size_t stack_size)
 {
     assert(d_main == nullptr && "run() called while already running");
-    assert(d_current == nullptr);
 
     dispatch(target, stack_size);
 
     d_main = context<>::main();
-    d_current = d_waiting.front();
-    d_waiting.pop();
-    context<>::swap(d_main, d_current);
+    context<>::swap(d_main, d_schedule.front());
 
     // cleanup (all this can't throw, so no need to get smart about exception safety and raii)
     cleanup();
@@ -43,13 +42,12 @@ void executor::yield()
 {
     gc();
 
-    if (!d_waiting.empty())
+    if (d_schedule.size() > 1)
     {
-        d_waiting.push(d_current);
-        d_current = d_waiting.front();
-        d_waiting.pop();
+        d_schedule.push(d_schedule.front());
+        d_schedule.pop();
 
-        context<>::swap(d_waiting.back(), d_current);
+        context<>::swap(d_schedule.back(), d_schedule.front());
     }
 }
 
@@ -68,32 +66,30 @@ executor::~executor()
 
 void executor::next()
 {
-    gc();
-    d_garbage.push_back(d_current);
+    assert(!d_schedule.empty());
 
-    if (d_waiting.empty()) // nothing else to do, return to main
+    gc();
+    d_garbage.push_back(d_schedule.front());
+    d_schedule.pop();
+
+    if (d_schedule.empty()) // nothing else to do, return to main
         context<>::set(d_main);
     else
-    {
-        d_current = d_waiting.front();
-        d_waiting.pop();
-        context<>::set(d_current);
-    }
+        context<>::set(d_schedule.front());
 }
 
 void executor::cleanup()
 {
     gc();
 
-    while(!d_waiting.empty())
+    while(!d_schedule.empty())
     {
-        auto h = d_waiting.front();
-        d_waiting.pop();
+        auto h = d_schedule.front();
+        d_schedule.pop();
         context<>::release(h);
     }
     context<>::release(d_main);
 
-    d_current = nullptr; // released via gc()
     d_main = nullptr;
 }
 

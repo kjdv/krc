@@ -32,8 +32,7 @@ private:
     void gc();
 
     context<>::handle d_main{nullptr};
-    context<>::handle d_current{nullptr};
-    std::queue<context<>::handle> d_waiting;
+    std::queue<context<>::handle> d_schedule;
     std::vector<context<>::handle> d_garbage;
 };
 
