@@ -202,10 +202,9 @@ void executor::cleanup()
         d_waiting.pop();
         context<>::release(h);
     }
-    context<>::release(d_current);
     context<>::release(d_main);
 
-    d_current = nullptr;
+    d_current = nullptr; // released via gc()
     d_main = nullptr;
 }
 
