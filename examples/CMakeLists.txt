@@ -1,3 +1,9 @@
+add_executable(context_switch
+    context_switch.cc
+)
+target_link_libraries(context_switch krc)
+add_test(context_switch context_switch)
+
 add_executable(executor
     executor.cc
 )
@@ -10,8 +16,8 @@ add_executable(fibonacci
 target_link_libraries(fibonacci krc)
 add_test(fibonacci fibonacci 10)
 
-add_executable(context_switch
-    context_switch.cc
+add_executable(io
+    io.cc
 )
-target_link_libraries(context_switch krc)
-add_test(context_switch context_switch)
+target_link_libraries(io krc)
+add_test(io io )

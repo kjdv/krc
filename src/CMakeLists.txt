@@ -4,6 +4,8 @@ add_library(krc
     context.cc
     executor.hh
     executor.cc
+    io.hh
+    io.cc
     mutex.hh
     mutex.cc
     ptr_translate.cc
