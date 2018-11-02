@@ -16,7 +16,7 @@ void foo()
     context<>::swap(foo_ctx, bar_ctx);
     cout << "done with foo" << " on " << context<>::get_id() << endl;
     cout << "switching to main" << endl;
-    context<>::swap(foo_ctx, main_ctx);
+    context<>::set(main_ctx);
 
     assert(false && "never reached");
 }
@@ -25,7 +25,7 @@ void bar()
 {
     cout << "enter bar" << " on " << context<>::get_id() << endl;
     cout << "switching to foo" << endl;
-    context<>::swap(bar_ctx, foo_ctx);
+    context<>::set(foo_ctx);
 
     assert(false && "never reached");
 }

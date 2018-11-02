@@ -71,6 +71,18 @@ void context<context_method::UCONTEXT>::swap(handle old_ctx, handle new_ctx)
     assert(rc == 0 && "swapcontext failed");
 }
 
+void context<context_method::UCONTEXT>::set(handle new_ctx)
+{
+    ucontext_handle *n = reinterpret_cast<ucontext_handle *>(new_ctx);
+
+    set_id(*n);
+    int rc = setcontext(&n->ctx);
+
+    if(rc != 0)
+        std::cerr << strerror(errno) << std::endl;
+    assert(rc == 0 && "setcontext failed");
+}
+
 context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::main()
 {
     assert(g_current_id == no_context && "main() called from within an active context");

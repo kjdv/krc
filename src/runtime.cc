@@ -21,4 +21,10 @@ void yield()
     exec.yield();
 }
 
+routine_id get_id()
+{
+    auto& exec = executor::instance();
+    return exec.get_id();
+}
+
 } // namespace krc

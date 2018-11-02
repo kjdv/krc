@@ -37,6 +37,11 @@ public:
         context<>::swap(old_ctx, new_ctx);
     }
 
+    void set(context<>::handle new_ctx)
+    {
+        context<>::set(new_ctx);
+    }
+
 private:
     std::vector<context<>::handle> d_handles;
 };
@@ -50,7 +55,7 @@ TEST_F(context_test, calls)
         items.push_back(1);
         swap(foo, bar);
         items.push_back(3);
-        swap(foo, mn);
+        set(mn);
         assert(false && "never reached");
     });
 

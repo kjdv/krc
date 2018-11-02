@@ -28,6 +28,9 @@ struct context<context_method::UCONTEXT>
     // yields control to new_ctx, while storing the current context in old_ctx
     static void swap(handle old_ctx, handle new_ctx);
 
+    // set the new context
+    static void set(handle new_ctx);
+
     // create a handle to the main context. it is ub to call this when there is an active context
     static handle main();
 

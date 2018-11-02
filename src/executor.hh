@@ -54,7 +54,7 @@ private:
 class executor : private no_copy
 {
 public:
-    static executor_old& instance();
+    static executor& instance();
 
     void dispatch(const std::function<void()>& target, size_t stack_size);
 
@@ -68,8 +68,16 @@ private:
     static executor s_instance;
 
     executor();
+    ~executor();
 
-    context<>::handle d_main;
+    void next();
+    void cleanup();
+    void gc();
+
+    context<>::handle d_main{nullptr};
+    context<>::handle d_current{nullptr};
+    std::queue<context<>::handle> d_waiting;
+    std::vector<context<>::handle> d_garbage;
 };
 
 } // namespace krc
