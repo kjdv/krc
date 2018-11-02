@@ -155,11 +155,10 @@ void executor::yield()
 
     if (!d_waiting.empty())
     {
-        auto new_ctx = d_waiting.front();
+        d_waiting.push(d_current);
+        d_current = d_waiting.front();
         d_waiting.pop();
 
-        d_waiting.push(d_current);
-        d_current = new_ctx;
         context<>::swap(d_waiting.back(), d_current);
     }
 }

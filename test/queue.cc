@@ -63,7 +63,7 @@ TEST(queue, pull_on_closed_returns_none)
     EXPECT_THAT(items, testing::ElementsAre(1, 2, 3, empty, empty, empty, empty, empty, empty, empty));
 }
 
-TEST(queue, push_on_closed_raises)
+TEST(queue, push_on_closed_returns_false)
 {
     queue<int> q(10);
 
