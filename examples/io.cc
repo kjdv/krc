@@ -1,14 +1,21 @@
 #include <io.hh>
 #include <runtime.hh>
+#include <channel.hh>
+
 #include <unistd.h>
 #include <sys/socket.h>
 #include <thread>
 #include <iostream>
+#include <string>
 
 using namespace std;
 using namespace krc;
 
 namespace {
+
+enum { bufsize = 1024 };
+
+chrono::duration sleep_time = chrono::milliseconds(10);
 
 struct closer {
     int fd;
@@ -21,35 +28,53 @@ struct closer {
 // echo whatever is send, slowly
 void echo(int fd)
 {
-    enum { bufsize = 1024 };
+    closer c{fd};
     char buf[bufsize];
 
     while(true)
     {
         auto r = ::read(fd, buf, bufsize);
-        if (r < 0)
+        if (r <= 0)
             return;
 
-        this_thread::sleep_for(chrono::seconds(1));
+        this_thread::sleep_for(sleep_time);
 
-
-        ssize_t w = 0;
-        while(r > 0)
-        {
-            auto t = ::write(fd, buf + w, r);
-            if (t <= 0)
-                break;
-            w += t;
-            r -= t;
-        }
+        ssize_t w = ::write(fd, buf, r);
+        if (w <= 0)
+          break;
     }
 }
 
-int gcd(int a , int b)
+void do_parallel_work()
 {
-    if (b == 0)
-        return a;
-    return gcd(b, a % b);
+    for(int i = 0; i < 10; ++i)
+    {
+        cout << "parallel work continues" << endl;
+        yield();
+        this_thread::sleep_for(sleep_time);
+    }
+}
+
+
+void do_io_work(int fd)
+{
+    closer c{fd};
+
+    for(int i = 0; i < 10; ++i)
+    {
+        string msg = string("message number ") + to_string(i);
+
+        auto w = io::write(fd, msg.data(), msg.size());
+        assert(w == msg.size());
+
+        char buf[bufsize];
+        int r = io::read(fd, buf, bufsize);
+        if(r > 0)
+        {
+            string reply(buf, buf + r);
+            cout << "reply: " << reply << endl;
+        }
+    }
 }
 
 }
@@ -64,13 +89,12 @@ int main()
         return 1;
     }
 
-    thread echo_server([&]{
-        int fd = fds[1];
-        closer c{fd};
-        echo(fd);
-    });
+    thread echo_thread([&]{ echo(fds[1]); });
 
-    echo_server.join();
+    dispatch(do_parallel_work);
+    run([&] { do_io_work(fds[0]);} );
+
+    echo_thread.join();
 
     return 0;
 }
