@@ -2,6 +2,7 @@ add_executable(krc_test
   context.cc
   channel.cc
   executor.cc
+  io.cc
   mutex.cc
   ptr_translate.cc
   queue.cc
