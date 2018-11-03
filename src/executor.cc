@@ -7,14 +7,16 @@ namespace krc {
 
 executor executor::s_instance;
 
-executor &executor::instance()
+executor& executor::instance()
 {
     return s_instance;
 }
 
-void executor::dispatch(const std::function<void ()> &target, size_t stack_size)
+void executor::dispatch(const std::function<void()>& target, size_t stack_size)
 {
-    auto wrapped = [=]{
+    assert(stack_size >= MIN_STACK_SIZE && "stack size too small");
+
+    auto wrapped = [=] {
         target();
         this->next();
 
@@ -25,7 +27,7 @@ void executor::dispatch(const std::function<void ()> &target, size_t stack_size)
     d_schedule.push(handle);
 }
 
-void executor::run(const std::function<void ()> &target, size_t stack_size)
+void executor::run(const std::function<void()>& target, size_t stack_size)
 {
     assert(d_main == nullptr && "run() called while already running");
 
@@ -42,7 +44,7 @@ void executor::yield()
 {
     gc();
 
-    if (d_schedule.size() > 1)
+    if(d_schedule.size() > 1)
     {
         d_schedule.push(d_schedule.front());
         d_schedule.pop();
@@ -57,7 +59,8 @@ routine_id executor::get_id()
 }
 
 executor::executor()
-{}
+{
+}
 
 executor::~executor()
 {
@@ -72,7 +75,7 @@ void executor::next()
     d_garbage.push_back(d_schedule.front());
     d_schedule.pop();
 
-    if (d_schedule.empty()) // nothing else to do, return to main
+    if(d_schedule.empty()) // nothing else to do, return to main
         context<>::set(d_main);
     else
         context<>::set(d_schedule.front());
@@ -95,7 +98,7 @@ void executor::cleanup()
 
 void executor::gc()
 {
-    for (auto h : d_garbage)
+    for(auto h : d_garbage)
         context<>::release(h);
     d_garbage.clear();
 }

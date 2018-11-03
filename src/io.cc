@@ -1,15 +1,15 @@
 #include "io.hh"
-#include <unistd.h>
-#include <poll.h>
 #include "runtime.hh"
+#include <poll.h>
+#include <unistd.h>
 
 namespace krc {
 namespace io {
 
-ssize_t read(int fd, void *buf, size_t n)
+ssize_t read(int fd, void* buf, size_t n)
 {
     pollfd pfd;
-    pfd.fd = fd;
+    pfd.fd     = fd;
     pfd.events = POLLIN | POLLHUP | POLLNVAL;
 
     int rc;
@@ -18,14 +18,14 @@ ssize_t read(int fd, void *buf, size_t n)
 
     if(rc > 0) // data ready
         return ::read(fd, buf, n);
-    else  // poll error
+    else // poll error
         return -1;
 }
 
-ssize_t write(int fd, const void *buf, size_t n)
+ssize_t write(int fd, const void* buf, size_t n)
 {
     pollfd pfd;
-    pfd.fd = fd;
+    pfd.fd     = fd;
     pfd.events = POLLOUT | POLLHUP | POLLNVAL;
 
     int rc;
@@ -34,11 +34,9 @@ ssize_t write(int fd, const void *buf, size_t n)
 
     if(rc > 0) // ready
         return ::write(fd, buf, n);
-    else  // poll error
+    else // poll error
         return -1;
 }
 
-
-
-}
-}
+} // namespace io
+} // namespace krc

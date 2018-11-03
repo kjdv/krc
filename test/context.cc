@@ -1,6 +1,6 @@
 #include <context.hh>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 namespace krc {
 namespace {
@@ -10,7 +10,7 @@ using testing::ElementsAre;
 class context_test : public testing::Test
 {
 public:
-    enum { stack_size = 1<<16 };
+    enum { stack_size = 1 << 16 };
 
     void TearDown() override
     {
@@ -48,10 +48,10 @@ private:
 
 TEST_F(context_test, calls)
 {
-    std::vector<int> items;
+    std::vector<int>  items;
     context<>::handle foo, bar, mn;
 
-    foo = make([&]{
+    foo = make([&] {
         items.push_back(1);
         swap(foo, bar);
         items.push_back(3);
@@ -59,7 +59,7 @@ TEST_F(context_test, calls)
         assert(false && "never reached");
     });
 
-    bar = make([&]{
+    bar = make([&] {
         items.push_back(2);
         swap(bar, foo);
         assert(false && "never reached");
@@ -73,5 +73,5 @@ TEST_F(context_test, calls)
     EXPECT_THAT(items, ElementsAre(1, 2, 3, 4));
 }
 
-}
-}
+} // namespace
+} // namespace krc

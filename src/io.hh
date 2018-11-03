@@ -3,7 +3,7 @@
 #include <sys/types.h>
 
 namespace krc {
-namespace io{
+namespace io {
 
 // variants of the well-known system calls that instead of blocking
 // or returning will yield control to another routine if they
@@ -13,7 +13,7 @@ namespace io{
 
 ssize_t read(int fd, void* buf, size_t n);
 
-ssize_t write(int fd, const void *buf, size_t n);
+ssize_t write(int fd, const void* buf, size_t n);
 
-}
-}
+} // namespace io
+} // namespace krc

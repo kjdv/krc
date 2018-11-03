@@ -1,10 +1,10 @@
 #pragma once
 
+#include "context.hh"
+#include "no_copy.hh"
 #include "runtime.hh"
 #include <queue>
 #include <vector>
-#include "no_copy.hh"
-#include "context.hh"
 
 namespace krc {
 
@@ -31,8 +31,8 @@ private:
     void cleanup();
     void gc();
 
-    context<>::handle d_main{nullptr};
-    std::queue<context<>::handle> d_schedule;
+    context<>::handle              d_main{nullptr};
+    std::queue<context<>::handle>  d_schedule;
     std::vector<context<>::handle> d_garbage;
 };
 

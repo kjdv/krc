@@ -18,12 +18,12 @@ struct context;
 template <>
 struct context<context_method::UCONTEXT>
 {
-    typedef void *handle;
-    typedef uintptr_t id;
+    typedef void*       handle;
+    typedef uintptr_t   id;
     constexpr static id no_context = 0;
 
     // creates a new handle
-    static handle make(const target_t &target, size_t stack_size);
+    static handle make(const target_t& target, size_t stack_size);
 
     // yields control to new_ctx, while storing the current context in old_ctx
     static void swap(handle old_ctx, handle new_ctx);
@@ -41,4 +41,4 @@ struct context<context_method::UCONTEXT>
     static id get_id();
 };
 
-}
+} // namespace krc

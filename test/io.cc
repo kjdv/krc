@@ -1,6 +1,6 @@
-#include <io.hh>
 #include <executor.hh>
 #include <gtest/gtest.h>
+#include <io.hh>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -18,21 +18,21 @@ public:
 
     void TearDown() override
     {
-       close(d_fds[0]);
-       close(d_fds[1]);
+        close(d_fds[0]);
+        close(d_fds[1]);
     }
 
-    int &local()
+    int& local()
     {
         return d_fds[0];
     }
 
-    int &peer()
+    int& peer()
     {
         return d_fds[1];
     }
 
-    void close(int &fd)
+    void close(int& fd)
     {
         if(fd >= 0)
         {
@@ -40,20 +40,21 @@ public:
             fd = 0;
         }
     }
+
 private:
-   int d_fds[2];
+    int d_fds[2];
 };
 
 TEST_F(io_test, yields_when_blocking_read)
 {
     char r;
-    int p = peer();
-    int l = local();
+    int  p = peer();
+    int  l = local();
 
-    dispatch([&r,l]{
+    dispatch([&r, l] {
         krc::io::read(l, &r, 1);
     });
-    run([p]{
+    run([p] {
         char c = 'a';
         ::write(p, &c, 1);
     });
@@ -63,11 +64,11 @@ TEST_F(io_test, yields_when_blocking_read)
 
 TEST_F(io_test, read_returns_on_close)
 {
-    int l = local();
+    int     l = local();
     ssize_t r;
 
     close(peer());
-    run([l, &r]{
+    run([l, &r] {
         char c;
         r = ::read(l, &c, 1);
     });
@@ -77,11 +78,11 @@ TEST_F(io_test, read_returns_on_close)
 
 TEST_F(io_test, read_returns_on_error)
 {
-    int l = local();
+    int     l = local();
     ssize_t r;
 
     close(local());
-    run([l, &r]{
+    run([l, &r] {
         char c;
         r = ::read(l, &c, 1);
     });
@@ -91,17 +92,17 @@ TEST_F(io_test, read_returns_on_error)
 
 TEST_F(io_test, write_returns_on_error)
 {
-    int l = local();
+    int     l = local();
     ssize_t r;
 
     close(local());
-    run([l, &r]{
+    run([l, &r] {
         char c = 'a';
-        r = ::write(l, &c, 1);
+        r      = ::write(l, &c, 1);
     });
 
     EXPECT_EQ(-1, r);
 }
 
-}
-}
+} // namespace
+} // namespace krc

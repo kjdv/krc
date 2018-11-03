@@ -1,12 +1,12 @@
+#include <channel.hh>
 #include <io.hh>
 #include <runtime.hh>
-#include <channel.hh>
 
-#include <unistd.h>
-#include <sys/socket.h>
-#include <thread>
 #include <iostream>
 #include <string>
+#include <sys/socket.h>
+#include <thread>
+#include <unistd.h>
 
 using namespace std;
 using namespace krc;
@@ -17,7 +17,8 @@ enum { bufsize = 1024 };
 
 chrono::duration sleep_time = chrono::milliseconds(10);
 
-struct closer {
+struct closer
+{
     int fd;
     ~closer()
     {
@@ -29,19 +30,19 @@ struct closer {
 void echo(int fd)
 {
     closer c{fd};
-    char buf[bufsize];
+    char   buf[bufsize];
 
     while(true)
     {
         auto r = ::read(fd, buf, bufsize);
-        if (r <= 0)
+        if(r <= 0)
             return;
 
         this_thread::sleep_for(sleep_time);
 
         ssize_t w = ::write(fd, buf, r);
-        if (w <= 0)
-          break;
+        if(w <= 0)
+            break;
     }
 }
 
@@ -55,7 +56,6 @@ void do_parallel_work()
     }
 }
 
-
 void do_io_work(int fd)
 {
     closer c{fd};
@@ -68,7 +68,7 @@ void do_io_work(int fd)
         assert(w == msg.size());
 
         char buf[bufsize];
-        int r = io::read(fd, buf, bufsize);
+        int  r = io::read(fd, buf, bufsize);
         if(r > 0)
         {
             string reply(buf, buf + r);
@@ -77,22 +77,22 @@ void do_io_work(int fd)
     }
 }
 
-}
+} // namespace
 
 int main()
 {
     // create a socketpair
     int fds[2];
-    if (socketpair(AF_LOCAL, SOCK_STREAM, 0, fds) != 0)
+    if(socketpair(AF_LOCAL, SOCK_STREAM, 0, fds) != 0)
     {
         cerr << "could not open socektpair" << endl;
         return 1;
     }
 
-    thread echo_thread([&]{ echo(fds[1]); });
+    thread echo_thread([&] { echo(fds[1]); });
 
     dispatch(do_parallel_work);
-    run([&] { do_io_work(fds[0]);} );
+    run([&] { do_io_work(fds[0]); });
 
     echo_thread.join();
 
