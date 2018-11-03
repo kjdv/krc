@@ -10,7 +10,7 @@ ssize_t read(int fd, void* buf, size_t n)
 {
     pollfd pfd;
     pfd.fd     = fd;
-    pfd.events = POLLIN | POLLRDHUP | POLLNVAL;
+    pfd.events = POLLIN | POLLNVAL;
 
     int rc;
     while((rc = ::poll(&pfd, 1, 0)) == 0)
@@ -26,7 +26,7 @@ ssize_t write(int fd, const void* buf, size_t n)
 {
     pollfd pfd;
     pfd.fd     = fd;
-    pfd.events = POLLOUT | POLLRDHUP | POLLNVAL;
+    pfd.events = POLLOUT | POLLNVAL;
 
     int rc;
     while((rc = ::poll(&pfd, 1, 0)) == 0)

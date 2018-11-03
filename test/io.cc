@@ -5,9 +5,15 @@
 #include <fcntl.h>
 #include <vector>
 
+// annoyingly there is no obvious portable way to figure out the size of pipe buffers
+#ifdef __linux__
+#define KNOWN_PIPE_BUFSIZE
+#endif
+
 namespace krc {
 namespace {
 
+#ifdef __linux__
 size_t fill_write_buffer(int fd, char val)
 {
     int bufsize = fcntl(fd, F_GETPIPE_SZ);
@@ -18,6 +24,13 @@ size_t fill_write_buffer(int fd, char val)
 
     return w;
 }
+#else // __linux__
+size_t fill_write_buffer(int fd, char val)
+{
+    assert(false && "find a portable way");
+    return 0;
+}
+#endif // __linux__
 
 class io_test : public testing::Test
 {
@@ -116,7 +129,11 @@ TEST_F(io_test, write_returns_on_error)
     EXPECT_EQ(-1, r);
 }
 
+#ifdef KNOWN_PIPE_BUFSIZE
 TEST_F(io_test, yields_when_blocking_write)
+#else
+TEST_F(io_test, DISABLED_yields_when_blocking_write)
+#endif
 {
     char r;
     int  p = read();
