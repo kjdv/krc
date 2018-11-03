@@ -115,7 +115,12 @@ TEST_F(io_test, read_returns_on_error)
     EXPECT_EQ(-1, r);
 }
 
+// only enabled on linux, exact behaviour is platform-dependent
+#ifdef __linux__
 TEST_F(io_test, write_returns_on_error)
+#else
+TEST_F(io_test, DISABLED_write_returns_on_error)
+#endif
 {
     int     l = read();
     ssize_t r;
