@@ -2,6 +2,11 @@
 [x] light-weight zero-buffer
 [-] (deferred) configurable switch between ucontext and fcontext from Boost.Context
 [x] support for informational routine ids
-[ ] io support
+[x] io support
 [ ] threading support
+[ ] signal handling
+
+[ ] extended io support
+    [ ] iostreams
+    [ ] open/connect yields
 
