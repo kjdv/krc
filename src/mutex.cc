@@ -3,21 +3,30 @@
 
 namespace krc {
 
+namespace {
+
+constexpr std::atomic_flag init_flag()
+{
+    return ATOMIC_FLAG_INIT;
+}
+
+}
+
+mutex::mutex()
+    : d_lock(init_flag())
+{}
+
 void mutex::lock()
 {
     auto& exec = executor::instance();
 
-    bool expect = false;
-    while(!d_held.compare_exchange_weak(expect, true))
-    {
-        expect = false;
+    while(!try_lock())
         exec.yield();
-    }
 }
 
 void mutex::unlock()
 {
-    d_held.store(false);
+    d_lock.clear(std::memory_order_release);
 
     auto& exec = executor::instance();
     exec.yield(); // this could well unblock someone else
@@ -25,8 +34,7 @@ void mutex::unlock()
 
 bool mutex::try_lock()
 {
-    bool expect = false;
-    return d_held.compare_exchange_strong(expect, true);
+    return d_lock.test_and_set(std::memory_order_acquire) == false;
 }
 
 } // namespace krc
