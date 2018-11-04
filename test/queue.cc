@@ -1,6 +1,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <queue.hh>
+#include <internal/queue.hh>
 #include <thread>
 #include <vector>
 

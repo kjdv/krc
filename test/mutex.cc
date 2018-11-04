@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <mutex.hh>
+#include <internal/mutex.hh>
 #include <runtime.hh>
 
 namespace krc {

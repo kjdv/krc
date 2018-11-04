@@ -4,8 +4,8 @@
 #include <memory>
 #include <optional>
 
-#include "queue.hh"
-#include "zero_queue.hh"
+#include "internal/queue.hh"
+#include "internal/zero_queue.hh"
 
 namespace krc {
 

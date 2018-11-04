@@ -1,4 +1,4 @@
-#include "mutex.hh"
+#include "internal/mutex.hh"
 #include "executor.hh"
 
 namespace krc {

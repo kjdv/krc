@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 #include <vector>
-#include <zero_queue.hh>
+#include <internal/zero_queue.hh>
 
 namespace krc {
 namespace {

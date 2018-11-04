@@ -1,7 +1,7 @@
 #pragma once
 
 #include "context.hh"
-#include "no_copy.hh"
+#include "internal/no_copy.hh"
 #include "runtime.hh"
 #include <queue>
 #include <vector>

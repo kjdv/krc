@@ -1,7 +1,7 @@
 add_executable(context_switch
     context_switch.cc
 )
-target_link_libraries(context_switch krc)
+target_link_libraries(context_switch krc krc_internal)
 add_test(context_switch context_switch)
 
 add_executable(executor
