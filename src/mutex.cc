@@ -4,18 +4,25 @@
 namespace krc {
 namespace internal {
 
-namespace {
+spinlock::spinlock()
+    : d_lock ATOMIC_FLAG_INIT
+{}
 
-constexpr std::atomic_flag init_flag()
+void spinlock::lock()
 {
-    return ATOMIC_FLAG_INIT;
+    while(!try_lock())
+        ;
 }
 
-} // namespace
+void spinlock::unlock()
+{
+    d_lock.clear(std::memory_order_release);
+}
 
-mutex::mutex()
-    : d_lock(init_flag())
-{}
+bool spinlock::try_lock()
+{
+    return d_lock.test_and_set(std::memory_order_acquire) == false;
+}
 
 void mutex::lock()
 {
@@ -27,7 +34,7 @@ void mutex::lock()
 
 void mutex::unlock()
 {
-    d_lock.clear(std::memory_order_release);
+    d_lock.unlock();
 
     auto& exec = executor::instance();
     exec.yield(); // this could well unblock someone else
@@ -35,7 +42,7 @@ void mutex::unlock()
 
 bool mutex::try_lock()
 {
-    return d_lock.test_and_set(std::memory_order_acquire) == false;
+    return d_lock.try_lock();
 }
 
 } // namespace internal

@@ -6,10 +6,10 @@
 namespace krc {
 namespace internal {
 
-class mutex : private no_copy
+class spinlock : private no_copy
 {
 public:
-    explicit mutex();
+    explicit spinlock();
 
     void lock();
 
@@ -19,6 +19,19 @@ public:
 
 private:
     std::atomic_flag d_lock;
+};
+
+class mutex : private no_copy
+{
+public:
+    void lock();
+
+    void unlock();
+
+    bool try_lock();
+
+private:
+    spinlock d_lock;
 };
 
 } // namespace internal
