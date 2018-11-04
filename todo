@@ -4,6 +4,7 @@
 [x] support for informational routine ids
 [x] io support
 [ ] threading support
+[ ] threaded functional equivalent
 [ ] signal handling
 
 [ ] extended io support

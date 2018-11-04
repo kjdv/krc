@@ -1,10 +1,6 @@
 #pragma once
 
-#include "context.hh"
-#include "internal/no_copy.hh"
-#include "runtime.hh"
-#include <queue>
-#include <vector>
+#include "single_executor.hh"
 
 namespace krc {
 
@@ -25,15 +21,8 @@ private:
     static executor s_instance;
 
     executor();
-    ~executor();
 
-    void next();
-    void cleanup();
-    void gc();
-
-    context<>::handle              d_main{nullptr};
-    std::queue<context<>::handle>  d_schedule;
-    std::vector<context<>::handle> d_garbage;
+    single_executor d_exec;
 };
 
 } // namespace krc

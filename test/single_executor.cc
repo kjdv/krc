@@ -1,4 +1,4 @@
-#include <executor.hh>
+#include <single_executor.hh>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -8,11 +8,11 @@ namespace {
 using namespace std;
 using namespace testing;
 
-class executor_test : public Test
+class single_executor_test : public Test
 {
 public:
     vector<int> events;
-    executor&   exec = executor::instance();
+    single_executor   exec;
 
     std::function<void()> emitter(int start, int end, bool interrupt = false)
     {
@@ -28,13 +28,13 @@ public:
     }
 };
 
-TEST_F(executor_test, basic_run)
+TEST_F(single_executor_test, basic_run)
 {
     exec.run(emitter(0, 3), DEFAULT_STACK_SIZE);
     EXPECT_THAT(events, ElementsAre(0, 1, 2));
 }
 
-TEST_F(executor_test, serial)
+TEST_F(single_executor_test, serial)
 {
     exec.dispatch(emitter(0, 3), DEFAULT_STACK_SIZE);
     exec.run(emitter(3, 6), DEFAULT_STACK_SIZE);
@@ -42,7 +42,7 @@ TEST_F(executor_test, serial)
     EXPECT_THAT(events, ElementsAre(0, 1, 2, 3, 4, 5));
 }
 
-TEST_F(executor_test, parallel)
+TEST_F(single_executor_test, parallel)
 {
     exec.dispatch(emitter(0, 3, true), DEFAULT_STACK_SIZE);
     exec.run(emitter(3, 6, true), DEFAULT_STACK_SIZE);
