@@ -6,6 +6,7 @@
 #include "mutex.hh"
 
 namespace krc {
+namespace internal {
 
 template <typename T>
 class zero_queue : private no_copy
@@ -106,4 +107,5 @@ bool zero_queue<T>::is_closed() const
     return d_closed;
 }
 
+} // namespace internal
 } // namespace krc

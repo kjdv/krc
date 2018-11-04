@@ -129,7 +129,7 @@ public:
     }
 
 private:
-    zero_queue<T> d_impl;
+    internal::zero_queue<T> d_impl;
 };
 
 template <typename T>
@@ -156,7 +156,7 @@ public:
     }
 
 private:
-    queue<T> d_impl;
+    internal::queue<T> d_impl;
 };
 
 template <typename T>

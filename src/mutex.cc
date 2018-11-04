@@ -2,6 +2,7 @@
 #include "executor.hh"
 
 namespace krc {
+namespace internal {
 
 namespace {
 
@@ -37,4 +38,5 @@ bool mutex::try_lock()
     return d_lock.test_and_set(std::memory_order_acquire) == false;
 }
 
+} // namespace internal
 } // namespace krc

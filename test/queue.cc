@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace krc {
+namespace internal {
 namespace {
 
 TEST(queue, push_pull)
@@ -102,4 +103,5 @@ TEST(queue, empty_indicator)
 }
 
 } // namespace
+} // namespace internal
 } // namespace krc

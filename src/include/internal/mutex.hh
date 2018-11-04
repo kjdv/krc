@@ -4,6 +4,7 @@
 #include <atomic>
 
 namespace krc {
+namespace internal {
 
 class mutex : private no_copy
 {
@@ -20,4 +21,5 @@ private:
     std::atomic_flag d_lock;
 };
 
+} // namespace internal
 } // namespace krc

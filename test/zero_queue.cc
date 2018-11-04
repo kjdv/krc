@@ -1,10 +1,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <internal/zero_queue.hh>
 #include <thread>
 #include <vector>
-#include <internal/zero_queue.hh>
 
 namespace krc {
+namespace internal {
 namespace {
 
 using namespace std;
@@ -66,4 +67,5 @@ TEST_F(zero_queue_test, push_on_closed_raises)
 }
 
 } // namespace
+} // namespace internal
 } // namespace krc

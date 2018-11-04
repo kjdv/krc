@@ -8,7 +8,7 @@
 
 namespace krc {
 
-class executor : private no_copy
+class executor : private internal::no_copy
 {
 public:
     static executor& instance();

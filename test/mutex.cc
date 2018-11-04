@@ -3,6 +3,7 @@
 #include <runtime.hh>
 
 namespace krc {
+namespace internal {
 namespace {
 
 TEST(mutex, try_lock)
@@ -44,4 +45,5 @@ TEST(mutex, lock_yields_when_held)
 }
 
 } // namespace
+} // namespace internal
 } // namespace krc

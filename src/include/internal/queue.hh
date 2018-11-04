@@ -9,6 +9,7 @@
 #include "mutex.hh"
 
 namespace krc {
+namespace internal {
 
 template <typename T>
 class queue : private no_copy
@@ -167,4 +168,5 @@ bool queue<T>::empty() const
     return d_base.empty();
 }
 
+} // namespace internal
 } // namespace krc
