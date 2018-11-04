@@ -82,7 +82,7 @@ public:
     const T& operator*() const
     {
         assert(d_item.has_value());
-        return d_item.value();
+        return *d_item;
     }
 
 private:

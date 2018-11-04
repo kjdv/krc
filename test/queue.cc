@@ -15,9 +15,9 @@ TEST(queue, push_pull)
     q.push(2);
     q.push(3);
 
-    EXPECT_EQ(1, q.pull().value());
-    EXPECT_EQ(2, q.pull().value());
-    EXPECT_EQ(3, q.pull().value());
+    EXPECT_EQ(1, *q.pull());
+    EXPECT_EQ(2, *q.pull());
+    EXPECT_EQ(3, *q.pull());
 }
 
 TEST(queue, push_beyond_max)
@@ -29,7 +29,7 @@ TEST(queue, push_beyond_max)
 
     std::thread t([&] {
         for(int i = 0; i < N; ++i)
-            items.push_back(q.pull().value());
+            items.push_back(*q.pull());
     });
 
     for(int i = 0; i < N; ++i)

@@ -40,9 +40,9 @@ TEST(channel, resolve_to_buffered_on_nonzero_queue_size)
     ch.push(2);
     ch.push(3);
 
-    EXPECT_EQ(1, ch.pull().value());
-    EXPECT_EQ(2, ch.pull().value());
-    EXPECT_EQ(3, ch.pull().value());
+    EXPECT_EQ(1, *ch.pull());
+    EXPECT_EQ(2, *ch.pull());
+    EXPECT_EQ(3, *ch.pull());
 }
 
 TEST(channel, range_support)

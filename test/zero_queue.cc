@@ -27,7 +27,7 @@ public:
                 if(!p.has_value())
                     return;
 
-                sink.push_back(p.value());
+                sink.push_back(*p);
             }
         });
     }
