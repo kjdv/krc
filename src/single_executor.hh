@@ -14,9 +14,9 @@ public:
     explicit single_executor();
     ~single_executor();
 
-    void dispatch(const std::function<void()>& target, size_t stack_size);
+    void dispatch(const target_t &target);
 
-    void run(const std::function<void()>& target, size_t stack_size);
+    void run(const target_t &target);
 
     void yield();
 

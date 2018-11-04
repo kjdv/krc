@@ -14,26 +14,27 @@ single_executor::~single_executor()
 }
 
 
-void single_executor::dispatch(const std::function<void()>& target, size_t stack_size)
+void single_executor::dispatch(const target_t &target)
 {
-    assert(stack_size >= MIN_STACK_SIZE && "stack size too small");
+    assert(target.stack_size >= MIN_STACK_SIZE && "stack size too small");
 
+    auto fn = target.target;
     auto wrapped = [=] {
-        target();
+        fn();
         this->next();
 
         assert(false && "unreachable");
     };
 
-    auto handle = context<>::make(wrapped, stack_size);
+    auto handle = context<>::make(target_t(wrapped, target.stack_size));
     d_schedule.push(handle);
 }
 
-void single_executor::run(const std::function<void()>& target, size_t stack_size)
+void single_executor::run(const target_t &target)
 {
     assert(d_main == nullptr && "run() called while already running");
 
-    dispatch(target, stack_size);
+    dispatch(target);
 
     d_main = context<>::main();
     context<>::swap(d_main, d_schedule.front());

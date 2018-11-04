@@ -3,16 +3,16 @@
 
 namespace krc {
 
-void dispatch(const std::function<void()>& target, size_t stack_size)
+void dispatch(const target_t &target)
 {
     auto& exec = executor::instance();
-    exec.dispatch(target, stack_size);
+    exec.dispatch(target);
 }
 
-void run(const std::function<void()>& target, size_t stack_size)
+void run(const target_t &target)
 {
     auto& exec = executor::instance();
-    exec.run(target, stack_size);
+    exec.run(target);
 }
 
 void yield()

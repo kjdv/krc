@@ -1,10 +1,9 @@
 #pragma once
 
 #include <functional>
+#include "runtime.hh"
 
 namespace krc {
-
-typedef std::function<void()> target_t;
 
 enum class context_method {
     UCONTEXT,
@@ -23,7 +22,7 @@ struct context<context_method::UCONTEXT>
     constexpr static id no_context = 0;
 
     // creates a new handle
-    static handle make(const target_t& target, size_t stack_size);
+    static handle make(const target_t &target);
 
     // yields control to new_ctx, while storing the current context in old_ctx
     static void swap(handle old_ctx, handle new_ctx);

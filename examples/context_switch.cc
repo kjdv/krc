@@ -37,11 +37,9 @@ void bar()
 
 int main()
 {
-    enum { stack_size = 1 << 16 };
-
     main_ctx = context<>::main();
-    foo_ctx  = context<>::make(foo, stack_size);
-    bar_ctx  = context<>::make(bar, stack_size);
+    foo_ctx  = context<>::make(foo);
+    bar_ctx  = context<>::make(bar);
 
     cout << "switching to foo"
          << " on " << context<>::get_id() << endl;

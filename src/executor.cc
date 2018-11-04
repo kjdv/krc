@@ -12,14 +12,14 @@ executor& executor::instance()
     return s_instance;
 }
 
-void executor::dispatch(const std::function<void()>& target, size_t stack_size)
+void executor::dispatch(const target_t &target)
 {
-    d_exec.dispatch(target, stack_size);
+    d_exec.dispatch(target);
 }
 
-void executor::run(const std::function<void()>& target, size_t stack_size)
+void executor::run(const target_t &target)
 {
-    d_exec.run(target, stack_size);
+    d_exec.run(target);
 }
 
 void executor::yield()

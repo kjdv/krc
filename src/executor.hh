@@ -1,6 +1,8 @@
 #pragma once
 
 #include "single_executor.hh"
+#include <thread>
+#include <vector>
 
 namespace krc {
 
@@ -9,9 +11,9 @@ class executor : private internal::no_copy
 public:
     static executor& instance();
 
-    void dispatch(const std::function<void()>& target, size_t stack_size);
+    void dispatch(const target_t &target);
 
-    void run(const std::function<void()>& target, size_t stack_size);
+    void run(const target_t &target);
 
     void yield();
 
@@ -23,6 +25,20 @@ private:
     executor();
 
     single_executor d_exec;
+
+    struct exec_info
+    {
+        single_executor exec;
+        std::thread thread;
+    };
+
+    std::vector<exec_info> d_executors;
+
+    struct pending_target
+    {
+        std::function<void()> target;
+        size_t stack_size;
+    };
 };
 
 } // namespace krc

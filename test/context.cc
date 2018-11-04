@@ -10,8 +10,6 @@ using testing::ElementsAre;
 class context_test : public testing::Test
 {
 public:
-    enum { stack_size = 1 << 16 };
-
     void TearDown() override
     {
         for(auto h : d_handles)
@@ -20,7 +18,7 @@ public:
 
     context<>::handle make(const target_t target)
     {
-        auto h = context<>::make(target, stack_size);
+        auto h = context<>::make(target);
         d_handles.push_back(h);
         return h;
     }
