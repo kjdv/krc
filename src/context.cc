@@ -117,7 +117,7 @@ void krc_run_target(int p1, int p2)
     auto             hp     = to_ptr(p1, p2);
     ucontext_handle* handle = reinterpret_cast<ucontext_handle*>(hp);
 
-    assert((char*)handle->stack_ptr + krc::offset == handle->ctx.uc_stack.ss_sp);
+    assert(handle->stack_ptr + krc::offset == handle->ctx.uc_stack.ss_sp);
 
     handle->target();
 

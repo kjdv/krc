@@ -49,7 +49,7 @@ private:
 template <bool, typename T>
 struct pull_helper
 {
-    static_assert(!std::is_move_assignable<T>::value);
+    static_assert(!std::is_move_constructible<T>::value);
 
     T operator()(std::queue<T>& q) const
     {
@@ -64,13 +64,13 @@ struct pull_helper
 template <typename T>
 struct pull_helper<true, T>
 {
-    static_assert(std::is_move_assignable<T>::value);
+    static_assert(std::is_move_constructible<T>::value);
 
     T operator()(std::queue<T>& q) const
     {
         assert(!q.empty());
 
-        T item = std::move(q.front());
+        T item(std::move(q.front()));
         q.pop();
         return item;
     }

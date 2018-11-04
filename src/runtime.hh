@@ -1,16 +1,15 @@
 #pragma once
 
+#include <algorithm>
 #include <functional>
 #include <signal.h>
 
 namespace krc {
 
 enum {
-    DEFAULT_STACK_SIZE = 1 << 15,
     MIN_STACK_SIZE     = MINSIGSTKSZ,
+    DEFAULT_STACK_SIZE = std::max(1 << 16, MIN_STACK_SIZE),
 };
-
-static_assert(MIN_STACK_SIZE <= DEFAULT_STACK_SIZE);
 
 typedef uintptr_t routine_id;
 

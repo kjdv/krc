@@ -59,8 +59,7 @@ routine_id executor::get_id()
 }
 
 executor::executor()
-{
-}
+{}
 
 executor::~executor()
 {

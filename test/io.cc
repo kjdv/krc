@@ -1,8 +1,8 @@
 #include <executor.hh>
+#include <fcntl.h>
 #include <gtest/gtest.h>
 #include <io.hh>
 #include <unistd.h>
-#include <fcntl.h>
 #include <vector>
 
 // annoyingly there is no obvious portable way to figure out the size of pipe buffers
@@ -16,7 +16,7 @@ namespace {
 #ifdef __linux__
 size_t fill_write_buffer(int fd, char val)
 {
-    int bufsize = fcntl(fd, F_GETPIPE_SZ);
+    int               bufsize = fcntl(fd, F_GETPIPE_SZ);
     std::vector<char> data(bufsize, val);
 
     auto w = ::write(fd, data.data(), data.size());
@@ -24,7 +24,7 @@ size_t fill_write_buffer(int fd, char val)
 
     return w;
 }
-#else // __linux__
+#else  // __linux__
 size_t fill_write_buffer(int fd, char val)
 {
     assert(false && "find a portable way");

@@ -10,7 +10,7 @@ constexpr std::atomic_flag init_flag()
     return ATOMIC_FLAG_INIT;
 }
 
-}
+} // namespace
 
 mutex::mutex()
     : d_lock(init_flag())

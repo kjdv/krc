@@ -69,7 +69,7 @@ std::optional<T> zero_queue<T>::pull()
     if(d_item == nullptr)
         return std::optional<T>();
 
-    T item = *d_item;
+    T item(std::move(*d_item));
     d_item = nullptr;
 
     l.unlock();

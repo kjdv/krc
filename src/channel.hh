@@ -47,8 +47,7 @@ class channel<T>::iterator : public std::iterator<std::input_iterator_tag, T>
 {
 public:
     explicit iterator()
-    {
-    }
+    {}
 
     explicit iterator(channel<T>* channel)
         : d_channel(channel)
@@ -101,9 +100,7 @@ template <typename T>
 class channel<T>::impl
 {
 public:
-    virtual ~impl()
-    {
-    }
+    virtual ~impl() = default;
 
     virtual bool push(T&& item) = 0;
 
@@ -141,8 +138,7 @@ class channel<T>::buffered : public channel<T>::impl
 public:
     explicit buffered(size_t max_size)
         : d_impl(max_size)
-    {
-    }
+    {}
 
     bool push(T&& item) override
     {
