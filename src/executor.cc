@@ -77,6 +77,11 @@ void executor::run_multi(const target_t &target, size_t num_threads)
 
     channel<target_t> dispatch_channel;
     vector<thread> subthreads;
+    defer joiner{[&subthreads]{
+        for(auto&& t : subthreads)
+            t.join();
+    }};
+
     for (size_t i = 0; i < num_threads - 1; ++i)
     {
         subthreads.emplace_back([&dispatch_channel]{
@@ -100,6 +105,8 @@ void executor::run_multi(const target_t &target, size_t num_threads)
     }};
 
     se.run(target);
+
+
 }
 
 void executor::yield()
