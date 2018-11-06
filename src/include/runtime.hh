@@ -18,8 +18,7 @@ struct target_t
     const callable_t target;
     const size_t stack_size{0};
 
-    target_t()
-    {}
+    target_t() = default;
     ~target_t() = default;
 
     template <typename F>
