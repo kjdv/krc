@@ -104,9 +104,12 @@ void executor::run_multi(const target_t &target, size_t num_threads)
             t_exec = nullptr;
     }};
 
-    se.run(target);
+    auto wrapped = [&target, &dispatch_channel] {
+        target.target();
+        dispatch_channel.close();
+    };
 
-
+    se.run(target_t(wrapped, target.stack_size));
 }
 
 void executor::yield()

@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 #include <vector>
+#include "debug.hh"
 
 namespace krc {
 namespace {
@@ -31,9 +32,12 @@ TEST(multi_executor, one_task) {
     collector c;
 
     auto sub = [&c]{
+        debug("starting sub");
         c.push(1);
         c.push(2);
         c.push(3);
+
+        debug("ending sub");
     };
 
     exec.run(sub, 2);
