@@ -1,4 +1,5 @@
 #include <executor.hh>
+#include <channel.hh>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <mutex>
@@ -22,27 +23,63 @@ public:
         items.push_back(i);
     }
 
+    target_t::callable_t make_pusher(channel<int> ch)
+    {
+        return [this, &ch]{
+            for (int i : ch)
+                push(i);
+        };
+    }
+
 private:
     typedef std::lock_guard<std::mutex> lock_t;
     mutable std::mutex d_mut;
 };
 
-TEST(multi_executor, one_task) {
-    auto& exec = executor::instance();
-    collector c;
+struct multi_executor_test : public testing::Test
+{
+    executor &exec{executor::instance()};
+    collector coll;
+    channel<int> chan;
 
-    auto sub = [&c]{
-        debug("starting sub");
-        c.push(1);
-        c.push(2);
-        c.push(3);
+    target_t::callable_t make_consumer()
+    {
+        return coll.make_pusher(chan);
+    }
 
-        debug("ending sub");
+    target_t::callable_t make_producer(int max)
+    {
+        return [this, max]{
+            for(int i = 0; i < max; ++i)
+                this->chan.push(i);
+        };
+    }
+};
+
+TEST_F(multi_executor_test, one_task)
+{
+    auto sub = [this]{
+        coll.push(1);
+        coll.push(2);
+        coll.push(3);
     };
 
     exec.run(sub, 2);
 
-    EXPECT_THAT(c.items, ElementsAre(1, 2, 3));
+    EXPECT_THAT(coll.items, ElementsAre(1, 2, 3));
+}
+
+TEST_F(multi_executor_test, two_tasks)
+{
+    auto sub1 = make_consumer();
+    auto sub2 = make_producer(3);
+
+    exec.run([&]{
+        exec.dispatch(sub1);
+        sub2();
+    }, 2);
+
+    EXPECT_THAT(coll.items, ElementsAre(1, 2, 3));
 }
 
 }

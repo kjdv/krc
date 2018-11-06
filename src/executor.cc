@@ -1,6 +1,7 @@
 #include "executor.hh"
 #include <cassert>
 #include <channel.hh>
+#include "debug.hh"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ void consume(channel<target_t> ch)
     assert(t_exec);
     for(auto& item : ch)
         t_exec->dispatch(item);
+    debug("done consuming");
 }
 
 }
@@ -89,6 +91,7 @@ void executor::run_multi(const target_t &target, size_t num_threads)
             single_executor se;
             t_exec = &se;
 
+            debug(string("run on ") + to_string((intptr_t)t_exec));
             se.run([&dispatch_channel] { consume(dispatch_channel); });
         });
     }
@@ -96,28 +99,37 @@ void executor::run_multi(const target_t &target, size_t num_threads)
     single_executor se;
     t_exec = &se;
     d_dispatcher = [&dispatch_channel](const target_t &item) {
+        debug("dispatching");
         dispatch_channel.push(item);
+        debug("done dispatching");
     };
 
     defer cleanup{[this] {
-            d_dispatcher = std::function<void(target_t)>();
+            // d_dispatcher = std::function<void(target_t)>();
             t_exec = nullptr;
     }};
 
     auto wrapped = [&target, &dispatch_channel] {
+        debug("main");
+        debug(string("run on ") + to_string((intptr_t)t_exec));
         target.target();
+        debug("done with main");
         dispatch_channel.close();
+        debug("fully done");
     };
 
     se.run(target_t(wrapped, target.stack_size));
+    debug("unwinding");
 }
 
 void executor::yield()
 {
+    debug("yielding");
     if (t_exec != nullptr)
         t_exec->yield();
     else
         this_thread::yield();
+    debug("done yield");
 }
 
 routine_id executor::get_id()
