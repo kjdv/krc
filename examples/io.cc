@@ -58,6 +58,8 @@ void do_parallel_work()
 
 void do_io_work(int fd)
 {
+    dispatch(do_parallel_work);
+
     closer c{fd};
 
     for(int i = 0; i < 10; ++i)
@@ -91,7 +93,6 @@ int main()
 
     thread echo_thread([&] { echo(fds[1]); });
 
-    dispatch(do_parallel_work);
     run([&] { do_io_work(fds[0]); });
 
     echo_thread.join();

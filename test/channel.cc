@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <runtime.hh>
 #include <vector>
+#include <debug.hh>
 
 namespace krc {
 namespace {
@@ -12,7 +13,7 @@ using namespace testing;
 
 TEST(channel, resolved_to_unbuffered_by_default)
 {
-    channel<int> ch;
+    channel<int> ch(1);
 
     vector<int> items;
 
@@ -23,11 +24,12 @@ TEST(channel, resolved_to_unbuffered_by_default)
         ch.close();
     };
     auto pull = [&] {
+        krc::dispatch(push);
+
         for(auto p : ch)
             items.push_back(p);
     };
 
-    krc::dispatch(push);
     krc::run(pull);
 
     EXPECT_THAT(items, ElementsAre(1, 2, 3));

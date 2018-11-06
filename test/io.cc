@@ -76,10 +76,11 @@ TEST_F(io_test, yields_when_blocking_read)
     int  p = write();
     int  l = read();
 
-    dispatch([&r, l] {
-        krc::io::read(l, &r, 1);
-    });
-    run([p] {
+    run([p, l, &r] {
+        dispatch([&r, l] {
+            krc::io::read(l, &r, 1);
+        });
+
         char c = 'a';
         krc::io::write(p, &c, 1);
     });
@@ -147,11 +148,11 @@ TEST_F(io_test, DISABLED_yields_when_blocking_write)
     // first fill the write buffer, else the test wont be valid
     auto size = fill_write_buffer(l, 'a');
 
-    dispatch([l] {
-        char c = 'a';
-        krc::io::write(l, &c, 1);
-    });
-    run([p, &r, size] {
+    run([p, l, &r, size] {
+        dispatch([l] {
+            char c = 'a';
+            krc::io::write(l, &c, 1);
+        });
         krc::io::read(p, &r, 1);
 
         std::vector<char> buf(size);

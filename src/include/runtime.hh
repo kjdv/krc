@@ -29,8 +29,9 @@ struct target_t
 };
 
 typedef uintptr_t routine_id;
+constexpr routine_id no_routine_id{0};
 
-// runs the target function as a coroutine. This can be called before or after a call to start()
+// runs the target function as a coroutine. This can only be called after run(), from within run().
 void dispatch(const target_t &target);
 
 // run the coroutines. You need to supply at least the top-level target

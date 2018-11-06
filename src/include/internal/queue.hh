@@ -1,12 +1,12 @@
 #pragma once
 
 #include <cassert>
-#include <condition_variable>
 #include <optional>
 #include <queue>
 #include <type_traits>
 
 #include "mutex.hh"
+#include "condition_variable.hh"
 
 namespace krc {
 namespace internal {
@@ -42,8 +42,8 @@ private:
     std::queue<T> d_base;
 
     mutable mutex               d_mutex;
-    std::condition_variable_any d_not_full;
-    std::condition_variable_any d_not_empty;
+    condition_variable d_not_full;
+    condition_variable d_not_empty;
     bool                        d_closed{false};
 };
 

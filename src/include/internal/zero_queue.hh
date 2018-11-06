@@ -1,8 +1,8 @@
 #pragma once
 
-#include <condition_variable>
 #include <optional>
 
+#include "condition_variable.hh"
 #include "mutex.hh"
 
 namespace krc {
@@ -31,8 +31,8 @@ private:
 
     T*                          d_item{nullptr};
     mutable mutex               d_mutex;
-    std::condition_variable_any d_pull_ready;
-    std::condition_variable_any d_push_ready;
+    condition_variable d_pull_ready;
+    condition_variable d_push_ready;
     bool                        d_closed{false};
 };
 
