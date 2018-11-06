@@ -13,7 +13,7 @@ using namespace testing;
 
 TEST(channel, resolved_to_unbuffered_by_default)
 {
-    channel<int> ch(1);
+    channel<int> ch;
 
     vector<int> items;
 

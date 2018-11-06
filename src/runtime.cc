@@ -9,10 +9,10 @@ void dispatch(const target_t &target)
     exec.dispatch(target);
 }
 
-void run(const target_t &target)
+void run(const target_t &target, size_t num_threads)
 {
     auto& exec = executor::instance();
-    exec.run(target);
+    exec.run(target, num_threads);
 }
 
 void yield()

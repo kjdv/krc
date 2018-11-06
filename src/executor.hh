@@ -13,32 +13,20 @@ public:
 
     void dispatch(const target_t &target);
 
-    void run(const target_t &target);
+    void run(const target_t &target, size_t num_threads);
 
     void yield();
 
     routine_id get_id();
 
 private:
+    void run_single(const target_t &target);
+
     static executor s_instance;
 
     executor();
 
-    single_executor d_exec;
-
-    struct exec_info
-    {
-        single_executor exec;
-        std::thread thread;
-    };
-
-    std::vector<exec_info> d_executors;
-
-    struct pending_target
-    {
-        std::function<void()> target;
-        size_t stack_size;
-    };
+    std::function<void(target_t)> d_dispatcher;
 };
 
 } // namespace krc

@@ -35,7 +35,7 @@ constexpr routine_id no_routine_id{0};
 void dispatch(const target_t &target);
 
 // run the coroutines. You need to supply at least the top-level target
-void run(const target_t &target);
+void run(const target_t &target, size_t num_threads = 1);
 
 // returns true if control was yielded, false if this could not be done (no other routines waiting)
 void yield();

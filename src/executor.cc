@@ -31,18 +31,30 @@ executor& executor::instance()
 
 void executor::dispatch(const target_t &target)
 {
-    assert(t_exec != nullptr && "called from outside a krc execution scope");
-    t_exec->dispatch(target);
+    assert(d_dispatcher && "called from outside a krc execution scope");
+    d_dispatcher(target);
 }
 
-void executor::run(const target_t &target)
+void executor::run(const target_t &target, size_t num_threads)
 {
     assert(t_exec == nullptr && "run() called more than once");
 
-    single_executor se;
+    run_single(target);
+}
 
-    defer cleanup{[] { t_exec = nullptr; }};
+void executor::run_single(const target_t &target)
+{
+    single_executor se;
     t_exec = &se;
+    d_dispatcher = [](const target_t &item) {
+        assert(t_exec != nullptr);
+        t_exec->dispatch(item);
+    };
+
+    defer cleanup{[this] {
+            d_dispatcher = std::function<void(target_t)>();
+            t_exec = nullptr;
+    }};
 
     se.run(target);
 }
