@@ -1,5 +1,6 @@
 #include "executor.hh"
 #include <cassert>
+#include <channel.hh>
 
 using namespace std;
 
@@ -20,6 +21,13 @@ struct defer
     }
 };
 
+void consume(channel<target_t> ch)
+{
+    assert(t_exec);
+    for(auto& item : ch)
+        t_exec->dispatch(item);
+}
+
 }
 
 executor executor::s_instance;
@@ -38,8 +46,12 @@ void executor::dispatch(const target_t &target)
 void executor::run(const target_t &target, size_t num_threads)
 {
     assert(t_exec == nullptr && "run() called more than once");
+    assert(num_threads > 0 && "need at least one thread");
 
-    run_single(target);
+    if(num_threads == 1)
+        run_single(target);
+    else
+        run_multi(target, num_threads);
 }
 
 void executor::run_single(const target_t &target)
@@ -49,6 +61,37 @@ void executor::run_single(const target_t &target)
     d_dispatcher = [](const target_t &item) {
         assert(t_exec != nullptr);
         t_exec->dispatch(item);
+    };
+
+    defer cleanup{[this] {
+            d_dispatcher = std::function<void(target_t)>();
+            t_exec = nullptr;
+    }};
+
+    se.run(target);
+}
+
+void executor::run_multi(const target_t &target, size_t num_threads)
+{
+    assert(num_threads >= 2);
+
+    channel<target_t> dispatch_channel;
+    vector<thread> subthreads;
+    for (size_t i = 0; i < num_threads - 1; ++i)
+    {
+        subthreads.emplace_back([&dispatch_channel]{
+            defer cleanup {[]{ t_exec = nullptr; }};
+            single_executor se;
+            t_exec = &se;
+
+            se.run([&dispatch_channel] { consume(dispatch_channel); });
+        });
+    }
+
+    single_executor se;
+    t_exec = &se;
+    d_dispatcher = [&dispatch_channel](const target_t &item) {
+        dispatch_channel.push(item);
     };
 
     defer cleanup{[this] {

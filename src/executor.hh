@@ -21,12 +21,13 @@ public:
 
 private:
     void run_single(const target_t &target);
+    void run_multi(const target_t &target, size_t num_threads);
 
     static executor s_instance;
 
     executor();
 
-    std::function<void(target_t)> d_dispatcher;
+    std::function<void(const target_t &)> d_dispatcher;
 };
 
 } // namespace krc

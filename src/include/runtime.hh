@@ -15,17 +15,47 @@ struct target_t
 {
     typedef std::function<void()> callable_t;
 
-    const callable_t target;
-    const size_t stack_size{0};
+    callable_t target;
+    size_t stack_size{0};
 
     target_t() = default;
     ~target_t() = default;
+
+    target_t(const target_t &other)
+        : target(other.target)
+        , stack_size(other.stack_size)
+    {}
+
+    target_t(target_t &&other)
+        : target(std::move(other.target))
+        , stack_size(other.stack_size)
+    {}
 
     template <typename F>
     target_t(F&& target_, size_t stack_size_ = DEFAULT_STACK_SIZE)
         : target(target_)
         , stack_size(stack_size_)
     {}
+
+    target_t &operator=(const target_t &other)
+    {
+        if (this != &other)
+        {
+            target = other.target;
+            stack_size = other.stack_size;
+        }
+        return *this;
+    }
+
+    target_t &operator=(target_t &&other)
+    {
+        if (this != &other)
+        {
+            target = std::move(other.target);
+            stack_size = other.stack_size;
+        }
+        return *this;
+    }
 };
 
 typedef uintptr_t routine_id;
