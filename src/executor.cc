@@ -80,6 +80,7 @@ void executor::run_multi(const target_t &target, size_t num_threads)
     channel<target_t> dispatch_channel;
     vector<thread> subthreads;
     defer joiner{[&subthreads]{
+        debug("joining threads");
         for(auto&& t : subthreads)
             t.join();
     }};
@@ -87,12 +88,16 @@ void executor::run_multi(const target_t &target, size_t num_threads)
     for (size_t i = 0; i < num_threads - 1; ++i)
     {
         subthreads.emplace_back([&dispatch_channel]{
-            defer cleanup {[]{ t_exec = nullptr; }};
+            defer cleanup {[]{
+                    debug("setting sub to null");
+                    t_exec = nullptr;
+            }};
             single_executor se;
             t_exec = &se;
 
             debug(string("run on ") + to_string((intptr_t)t_exec));
             se.run([&dispatch_channel] { consume(dispatch_channel); });
+            t_exec = nullptr;
         });
     }
 
@@ -105,8 +110,9 @@ void executor::run_multi(const target_t &target, size_t num_threads)
     };
 
     defer cleanup{[this] {
-            // d_dispatcher = std::function<void(target_t)>();
-            t_exec = nullptr;
+           debug("setting main to null");
+           d_dispatcher = std::function<void(target_t)>();
+           t_exec = nullptr;
     }};
 
     auto wrapped = [&target, &dispatch_channel] {

@@ -23,7 +23,7 @@ public:
         items.push_back(i);
     }
 
-    target_t::callable_t make_pusher(channel<int> ch)
+    target_t::callable_t make_pusher(channel<int> &ch)
     {
         return [this, &ch]{
             for (int i : ch)
