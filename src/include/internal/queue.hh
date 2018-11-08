@@ -23,7 +23,8 @@ public:
 
     size_t max_size() const;
 
-    bool push(T&& item);
+    template <typename U>
+    bool push(U&& item);
 
     std::optional<T> pull();
 
@@ -91,15 +92,18 @@ size_t queue<T>::max_size() const
 }
 
 template <typename T>
-bool queue<T>::push(T&& item)
+template <typename U>
+bool queue<T>::push(U&& item)
 {
+    static_assert(std::is_same<typename std::decay<T>::type, typename std::decay<U>::type>::value);
+
     lock_t l(d_mutex);
     d_not_full.wait(l, [=] { return closed() || this->not_full(); });
 
     if(closed())
         return false;
 
-    d_base.emplace(std::forward<T>(item));
+    d_base.emplace(std::forward<U>(item));
 
     l.unlock();
     d_not_empty.notify_one();
