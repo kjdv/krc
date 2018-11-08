@@ -3,6 +3,8 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <type_traits>
+#include <variant>
 
 #include "internal/queue.hh"
 #include "internal/zero_queue.hh"
@@ -19,8 +21,8 @@ public:
 
     // push the item on the channel, returns true on success and false if
     // the channel is closed and the item could not be pushed
-    bool push(T&& item);
-    bool push(const T& item);
+    template <typename U>
+    bool push(U&& item);
 
     // pull an item from the channel, returns no value if the channel is closed
     std::optional<T> pull();
@@ -33,13 +35,12 @@ public:
     iterator end();
 
 private:
-    class impl;
-    class unbuffered;
-    class buffered;
+    typedef std::variant<internal::zero_queue<T>, internal::queue<T>> impl_t;
+    typedef std::shared_ptr<impl_t> pimpl_t;
 
-    static std::shared_ptr<impl> make_impl(size_t queue_size);
+    static pimpl_t make_impl(size_t queue_size);
 
-    std::shared_ptr<impl> d_pimpl;
+    pimpl_t d_pimpl;
 };
 
 template <typename T>
@@ -97,75 +98,12 @@ private:
 };
 
 template <typename T>
-class channel<T>::impl
-{
-public:
-    virtual ~impl() = default;
-
-    virtual bool push(T&& item) = 0;
-
-    virtual std::optional<T> pull() = 0;
-
-    virtual void close() = 0;
-};
-
-template <typename T>
-class channel<T>::unbuffered : public channel<T>::impl
-{
-public:
-    bool push(T&& item) override
-    {
-        return d_impl.push(std::forward<T>(item));
-    }
-
-    std::optional<T> pull() override
-    {
-        return d_impl.pull();
-    }
-
-    void close() override
-    {
-        d_impl.close();
-    }
-
-private:
-    internal::zero_queue<T> d_impl;
-};
-
-template <typename T>
-class channel<T>::buffered : public channel<T>::impl
-{
-public:
-    explicit buffered(size_t max_size)
-        : d_impl(max_size)
-    {}
-
-    bool push(T&& item) override
-    {
-        return d_impl.push(std::forward<T>(item));
-    }
-
-    std::optional<T> pull() override
-    {
-        return d_impl.pull();
-    }
-
-    void close() override
-    {
-        d_impl.close();
-    }
-
-private:
-    internal::queue<T> d_impl;
-};
-
-template <typename T>
-std::shared_ptr<typename channel<T>::impl> channel<T>::make_impl(size_t queue_size)
+typename channel<T>::pimpl_t channel<T>::make_impl(size_t queue_size)
 {
     if(queue_size)
-        return std::make_shared<channel<T>::buffered>(queue_size);
+        return std::make_shared<impl_t>(std::in_place_type<internal::queue<T>>, queue_size);
     else
-        return std::make_shared<channel<T>::unbuffered>();
+        return std::make_shared<impl_t>(std::in_place_type<internal::zero_queue<T>>);
 }
 
 template <typename T>
@@ -174,32 +112,41 @@ channel<T>::channel(size_t queue_size)
 {
 }
 
-template <typename T>
-bool channel<T>::push(T&& item)
+template <typename T> template<typename U>
+bool channel<T>::push(U&& item)
 {
     assert(d_pimpl);
-    return d_pimpl->push(std::forward<T>(item));
-}
+    static_assert(std::is_same<typename std::decay<T>::type, typename std::decay<U>::type>::value);
 
-template <typename T>
-bool channel<T>::push(const T& item)
-{
-    assert(d_pimpl);
-    return d_pimpl->push(T(item)); // only place where this odd duplication is needed, only copy needed
+    auto visitor = [&item](auto&& q) {
+        return q.push(std::forward<U>(item));
+    };
+
+    return std::visit(visitor, *d_pimpl);
 }
 
 template <typename T>
 std::optional<T> channel<T>::pull()
 {
     assert(d_pimpl);
-    return d_pimpl->pull();
+
+    auto visitor = [](auto&& q) {
+        return q.pull();
+    };
+
+    return std::visit(visitor, *d_pimpl);
 }
 
 template <typename T>
 void channel<T>::close()
 {
     assert(d_pimpl);
-    return d_pimpl->close();
+
+    auto visitor = [](auto&& q) {
+        q.close();
+    };
+
+    std::visit(visitor, *d_pimpl);
 }
 
 template <typename T>

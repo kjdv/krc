@@ -14,7 +14,8 @@ class zero_queue : private no_copy
 public:
     explicit zero_queue();
 
-    bool push(T&& item);
+    template <typename U>
+    bool push(U&& item);
 
     std::optional<T> pull();
 
@@ -42,8 +43,11 @@ zero_queue<T>::zero_queue()
 }
 
 template <typename T>
-bool zero_queue<T>::push(T&& item)
+template <typename U>
+bool zero_queue<T>::push(U&& item)
 {
+    static_assert(std::is_same<typename std::decay<T>::type, typename std::decay<U>::type>::value);
+
     lock_t l(d_mutex);
 
     d_push_ready.wait(l, [this] { return is_closed() || can_push(); });
