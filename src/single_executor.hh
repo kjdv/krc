@@ -14,9 +14,9 @@ public:
     explicit single_executor();
     ~single_executor();
 
-    void dispatch(const target_t &target);
+    void dispatch(target_t target);
 
-    void run(const target_t &target);
+    void run(target_t target);
 
     void yield();
 

@@ -14,11 +14,11 @@ single_executor::~single_executor()
 }
 
 
-void single_executor::dispatch(const target_t &target)
+void single_executor::dispatch(target_t target)
 {
     assert(target.stack_size >= MIN_STACK_SIZE && "stack size too small");
 
-    auto fn = target.target;
+    auto fn = move(target.target);
     auto wrapped = [=] {
         fn();
         this->next();
@@ -30,11 +30,11 @@ void single_executor::dispatch(const target_t &target)
     d_schedule.push(handle);
 }
 
-void single_executor::run(const target_t &target)
+void single_executor::run(target_t target)
 {
     assert(d_main == nullptr && "run() called while already running");
 
-    dispatch(target);
+    dispatch(move(target));
 
     d_main = context<>::main();
     context<>::swap(d_main, d_schedule.front());

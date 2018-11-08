@@ -39,30 +39,30 @@ executor& executor::instance()
     return s_instance;
 }
 
-void executor::dispatch(const target_t &target)
+void executor::dispatch(target_t target)
 {
     assert(d_dispatcher && "called from outside a krc execution scope");
-    d_dispatcher(target);
+    d_dispatcher(move(target));
 }
 
-void executor::run(const target_t &target, size_t num_threads)
+void executor::run(target_t target, size_t num_threads)
 {
     assert(t_exec == nullptr && "run() called more than once");
     assert(num_threads > 0 && "need at least one thread");
 
     if(num_threads == 1)
-        run_single(target);
+        run_single(move(target));
     else
-        run_multi(target, num_threads);
+        run_multi(move(target), num_threads);
 }
 
-void executor::run_single(const target_t &target)
+void executor::run_single(target_t target)
 {
     single_executor se;
     t_exec = &se;
-    d_dispatcher = [](const target_t &item) {
+    d_dispatcher = [](target_t item) {
         assert(t_exec != nullptr);
-        t_exec->dispatch(item);
+        t_exec->dispatch(move(item));
     };
 
     defer cleanup{[this] {
@@ -70,10 +70,10 @@ void executor::run_single(const target_t &target)
             t_exec = nullptr;
     }};
 
-    se.run(target);
+    se.run(move(target));
 }
 
-void executor::run_multi(const target_t &target, size_t num_threads)
+void executor::run_multi(target_t target, size_t num_threads)
 {
     assert(num_threads >= 2);
 
@@ -115,10 +115,10 @@ void executor::run_multi(const target_t &target, size_t num_threads)
            t_exec = nullptr;
     }};
 
-    auto wrapped = [&target, &dispatch_channel] {
+    auto wrapped = [fn = move(target.target), &dispatch_channel] {
         debug("main");
         debug(string("run on ") + to_string((intptr_t)t_exec));
-        target.target();
+        fn();
         debug("done with main");
         dispatch_channel.close();
         debug("fully done");
