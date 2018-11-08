@@ -103,9 +103,9 @@ void executor::run_multi(const target_t &target, size_t num_threads)
 
     single_executor se;
     t_exec = &se;
-    d_dispatcher = [&dispatch_channel](const target_t &item) {
+    d_dispatcher = [&dispatch_channel](target_t item) {
         debug("dispatching");
-        dispatch_channel.push(item);
+        dispatch_channel.push(move(item));
         debug("done dispatching");
     };
 

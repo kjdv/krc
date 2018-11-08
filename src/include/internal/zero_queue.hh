@@ -30,7 +30,7 @@ private:
 
     bool can_pull() const;
 
-    T*                          d_item{nullptr};
+    std::optional<T>            d_item;
     mutable mutex               d_mutex;
     condition_variable d_pull_ready;
     condition_variable d_push_ready;
@@ -55,7 +55,7 @@ bool zero_queue<T>::push(U&& item)
     if(is_closed())
         return false;
 
-    d_item = &item;
+    d_item = std::move(item);
 
     l.unlock();
     d_pull_ready.notify_one();
@@ -71,11 +71,11 @@ std::optional<T> zero_queue<T>::pull()
     lock_t l(d_mutex);
     d_pull_ready.wait(l, [this] { return is_closed() || can_pull(); });
 
-    if(d_item == nullptr)
+    if(!d_item.has_value())
         return std::optional<T>();
 
     T item(std::move(*d_item));
-    d_item = nullptr;
+    d_item.reset();
 
     l.unlock();
 
@@ -96,13 +96,13 @@ void zero_queue<T>::close()
 template <typename T>
 bool zero_queue<T>::can_push() const
 {
-    return d_item == nullptr;
+    return !d_item.has_value();
 }
 
 template <typename T>
 bool zero_queue<T>::can_pull() const
 {
-    return d_item != nullptr;
+    return d_item.has_value();
 }
 
 template <typename T>
