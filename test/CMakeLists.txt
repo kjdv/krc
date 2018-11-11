@@ -13,4 +13,4 @@ add_executable(krc_test
 target_link_libraries(krc_test krc krc_internal gtest)
 
 add_test(unit_test krc_test)
-add_test(soak_test krc_test --gtest_shuffle --gtest_repeat=1000)
+add_test(soak_test krc_test --gtest_shuffle --gtest_repeat=100)

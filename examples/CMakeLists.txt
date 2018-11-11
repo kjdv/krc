@@ -21,3 +21,10 @@ add_executable(io
 )
 target_link_libraries(io krc)
 add_test(io io )
+
+add_executable(multithreading
+    multithreading.cc
+)
+target_link_libraries(multithreading krc)
+add_test(multithreading multithreading)
+
