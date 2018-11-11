@@ -32,12 +32,7 @@ struct target_t
         , stack_size(other.stack_size)
     {}
 
-    target_t(target_t &other) noexcept
-        : target(other.target)
-        , stack_size(other.stack_size)
-    {}
-
-    template <typename F>
+    template <typename F, typename = std::enable_if_t<std::is_convertible<F, callable_t>::value> >
     target_t(F&& target_, size_t stack_size_ = DEFAULT_STACK_SIZE)
         : target(target_)
         , stack_size(stack_size_)
