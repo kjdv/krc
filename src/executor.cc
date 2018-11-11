@@ -1,7 +1,6 @@
 #include "executor.hh"
 #include <cassert>
 #include <channel.hh>
-#include "debug.hh"
 #include "single_executor.hh"
 #include "multi_executor.hh"
 

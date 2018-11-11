@@ -4,7 +4,6 @@
 #include <gmock/gmock.h>
 #include <mutex>
 #include <vector>
-#include "debug.hh"
 
 namespace krc {
 namespace {
@@ -20,7 +19,6 @@ public:
     void push(int i)
     {
         lock_t l(d_mut);
-        debug("consume " + std::to_string(i));
         items.push_back(i);
     }
 
@@ -29,7 +27,6 @@ public:
         return [this, ch]() mutable {
             for (int i : ch)
                 push(i);
-            debug("done consuming");
         };
     }
 
