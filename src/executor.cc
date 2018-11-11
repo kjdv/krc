@@ -3,6 +3,7 @@
 #include <channel.hh>
 #include "debug.hh"
 #include "single_executor.hh"
+#include "multi_executor.hh"
 
 using namespace std;
 
@@ -62,24 +63,16 @@ void executor::run(target_t target, size_t num_threads)
     assert(get_id() == no_routine_id && "run() called from within an active run()");
     assert(num_threads > 0 && "need at least one thread");
 
-    if(num_threads == 1)
-        run_single(move(target));
-    else
-        run_multi(move(target), num_threads);
-}
-
-void executor::run_single(target_t target)
-{
     defer reset{[this] {
         this->d_delegate = std::make_unique<noop_executor>();
     }};
-    d_delegate = std::make_unique<single_executor>();
-    d_delegate->run(move(target));
-}
 
-void executor::run_multi(target_t target, size_t num_threads)
-{
-    assert(num_threads >= 2);
+    if(num_threads == 1)
+        d_delegate = std::make_unique<single_executor>();
+    else
+        d_delegate = std::make_unique<multi_executor>(num_threads);
+
+    d_delegate->run(move(target));
 }
 
 void executor::yield()

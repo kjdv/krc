@@ -35,9 +35,6 @@ public:
     routine_id get_id() const;
 
 private:
-    void run_single(target_t target);
-    void run_multi(target_t target, size_t num_threads);
-
     static executor s_instance;
 
     executor();

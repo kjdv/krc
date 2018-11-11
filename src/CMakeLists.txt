@@ -21,10 +21,11 @@ add_library(krc
     executor.hh
     executor.cc
     io.cc
+    multi_executor.hh
+    multi_executor.cc
     mutex.cc
     ptr_translate.cc
     ptr_translate.hh
-
     runtime.cc
     single_executor.hh
     single_executor.cc
