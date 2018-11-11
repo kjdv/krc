@@ -33,6 +33,8 @@ public:
 
     std::pair<std::optional<T>, status> try_pull();
 private:
+    using iter = typename std::vector<T>::iterator;
+
     size_t capacity() const
     {
         return d_buffer.size();
@@ -48,28 +50,40 @@ private:
         return d_write == d_read;
     }
 
-    bool is_full() const
+    bool is_full()
     {
         return next(d_write) == d_read;
     }
 
-    size_t next(size_t idx) const
+    iter next(iter it)
     {
-        return (idx == capacity() - 1) ? 0 : idx + 1;
+        return (it + 1) == end() ? begin() : (it + 1);
+    }
+
+    iter begin()
+    {
+        return d_buffer.begin();
+    }
+
+    iter end()
+    {
+        return d_buffer.end();
     }
 
     using lock_t = std::lock_guard<krc::internal::mutex>;
 
     mutable krc::internal::mutex d_mutex;
     std::vector<T> d_buffer;
-    size_t d_read{0};
-    size_t d_write{0};
+    typename std::vector<T>::iterator d_read;
+    typename std::vector<T>::iterator d_write;
     bool d_closed{false};
 };
 
 template <typename T>
 ringbuffer<T>::ringbuffer(size_t capacity)
     : d_buffer(capacity+1)
+    , d_read(d_buffer.begin())
+    , d_write(d_buffer.begin())
 {
     assert(d_buffer.size() > 1);
 }
@@ -108,9 +122,8 @@ typename ringbuffer<T>::status ringbuffer<T>::try_push(U && item)
     if(is_full())
         return status::full;
 
-    d_buffer[d_write++] = std::move(item);
-    if (d_write >= capacity())
-        d_write = 0;
+    *d_write = std::move(item);
+    d_write = next(d_write);
 
     return status::ok;
 }
@@ -149,9 +162,9 @@ std::pair<std::optional<T>, typename ringbuffer<T>::status> ringbuffer<T>::try_p
             return std::make_pair(std::optional<T>(), status::empty);
     }
 
-    T result = std::move(d_buffer[d_read++]);
-    if (d_read >= capacity())
-        d_read = 0;
+    T result = std::move(*d_read);
+    d_read = next(d_read);
+
     return std::make_pair<std::optional<T>, status>(result, status::ok);
 }
 
