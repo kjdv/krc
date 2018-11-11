@@ -33,5 +33,9 @@ target_include_directories(krc
 )
 
 if(APPLE)
-    target_compile_options(krc PUBLIC -D_XOPEN_SOURCE -Wno-deprecated-declarations)
+    # for osx we need to pass -D_XOPEN_SOURCE to be able to use the 'deprecated' {set,swap,make}context functions
+    # alsi, we need to set the minimal deployement target to 10.14 to be able to use certain c++17 features (i.e.
+    # variant visitors, optional access)
+    target_compile_options(krc PRIVATE -D_XOPEN_SOURCE -Wno-deprecated-declarations PUBLIC -mmacosx-version-min=10.14)
+    target_link_libraries(krc PUBLIC -mmacosx-version-min=10.14)
 endif()
