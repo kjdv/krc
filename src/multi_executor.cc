@@ -43,10 +43,7 @@ multi_executor::multi_executor(size_t num_threads)
 multi_executor::~multi_executor()
 {
     for(auto& s: d_subs)
-    {
-        if(s.thread.joinable())
-          s.thread.join();
-    }
+        s.thread.join();
 }
 
 void multi_executor::dispatch(target_t target)
@@ -61,10 +58,8 @@ void multi_executor::run(target_t target)
             consume(d_dispatcher, d_main.exec);
         });
         target.target();
-        d_dispatcher.close();
 
-        for (auto&& s : d_subs)
-            s.thread.join();
+        d_dispatcher.close();
     };
 
     d_main.exec.run(target_t(wrapped, target.stack_size));

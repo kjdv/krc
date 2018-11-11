@@ -5,6 +5,7 @@
 #include <mutex>
 #include <vector>
 
+
 namespace krc {
 namespace {
 
@@ -40,19 +41,32 @@ struct multi_executor_test : public testing::Test
     executor &exec{executor::instance()};
     collector coll;
     channel<int> chan;
+    channel<bool> done{100};
 
     target_t::callable_t make_consumer()
     {
-        return coll.make_pusher(chan);
+        auto fn = coll.make_pusher(chan);
+        return [this, fn] {
+            fn();
+            done.push(true);
+        };
     }
 
-    target_t::callable_t make_producer(int max)
+    target_t::callable_t make_producer(int min, int max)
     {
-        return [this, max]{
-            for(int i = 0; i < max; ++i)
+        assert(max > min);
+        return [this, min, max]{
+            for(int i = min; i < max; ++i)
                 this->chan.push(i);;
-            this->chan.close();
+            this->done.push(true);
         };
+    }
+
+    void wait(unsigned n)
+    {
+        for(unsigned i = 0; i < n; ++i)
+            done.pull();
+        chan.close();
     }
 };
 
@@ -72,15 +86,33 @@ TEST_F(multi_executor_test, one_task)
 TEST_F(multi_executor_test, two_tasks)
 {
     auto sub1 = make_consumer();
-    auto sub2 = make_producer(3);
+    auto sub2 = make_producer(0, 3);
 
     exec.run([&]{
         exec.dispatch(sub1);
         sub2();
+        wait(1);
     }, 2);
 
     EXPECT_THAT(coll.items, ElementsAre(0, 1, 2));
 }
+
+TEST_F(multi_executor_test, multi_producer)
+{
+    auto sub1 = make_consumer();
+    auto sub2 = make_producer(0, 3);
+    auto sub3 = make_producer(3, 6);
+
+    exec.run([&]{
+        exec.dispatch(sub1);
+        exec.dispatch(sub2);
+        sub3();
+        wait(2);
+    }, 2);
+
+    EXPECT_THAT(coll.items, UnorderedElementsAre(0, 1, 2, 3, 4, 5));
+}
+
 
 }
 }
