@@ -2,12 +2,8 @@
 
 #include <iterator>
 #include <memory>
-#include <optional>
-#include <type_traits>
-#include <variant>
 
-#include "internal/queue.hh"
-#include "internal/zero_queue.hh"
+#include "internal/ringbuffer.hh"
 
 namespace krc {
 
@@ -35,12 +31,7 @@ public:
     iterator end();
 
 private:
-    typedef std::variant<internal::zero_queue<T>, internal::queue<T>> impl_t;
-    typedef std::shared_ptr<impl_t> pimpl_t;
-
-    static pimpl_t make_impl(size_t queue_size);
-
-    pimpl_t d_pimpl;
+    std::shared_ptr<internal::ringbuffer<T>> d_buffer;
 };
 
 template <typename T>
@@ -98,55 +89,29 @@ private:
 };
 
 template <typename T>
-typename channel<T>::pimpl_t channel<T>::make_impl(size_t queue_size)
-{
-    if(queue_size)
-        return std::make_shared<impl_t>(std::in_place_type<internal::queue<T>>, queue_size);
-    else
-        return std::make_shared<impl_t>(std::in_place_type<internal::zero_queue<T>>);
-}
-
-template <typename T>
 channel<T>::channel(size_t queue_size)
-    : d_pimpl(make_impl(queue_size))
-{
-}
+    : d_buffer(std::make_shared<internal::ringbuffer<T>>(std::max<size_t>(1, queue_size)))
+{}
 
 template <typename T> template<typename U>
 bool channel<T>::push(U&& item)
 {
-    assert(d_pimpl);
-    static_assert(std::is_same<typename std::decay<T>::type, typename std::decay<U>::type>::value);
-
-    auto visitor = [&item](auto&& q) {
-        return q.push(std::forward<U>(item));
-    };
-
-    return std::visit(visitor, *d_pimpl);
+    assert(d_buffer);
+    return d_buffer->push(std::forward<U>(item));
 }
 
 template <typename T>
 std::optional<T> channel<T>::pull()
 {
-    assert(d_pimpl);
-
-    auto visitor = [](auto&& q) {
-        return q.pull();
-    };
-
-    return std::visit(visitor, *d_pimpl);
+    assert(d_buffer);
+    return d_buffer->pull();
 }
 
 template <typename T>
 void channel<T>::close()
 {
-    assert(d_pimpl);
-
-    auto visitor = [](auto&& q) {
-        q.close();
-    };
-
-    std::visit(visitor, *d_pimpl);
+    assert(d_buffer);
+    d_buffer->close();
 }
 
 template <typename T>

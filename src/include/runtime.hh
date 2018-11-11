@@ -22,13 +22,18 @@ struct target_t
     target_t() = default;
     ~target_t() = default;
 
-    target_t(const target_t &other)
+    target_t(const target_t &other) noexcept
         : target(other.target)
         , stack_size(other.stack_size)
     {}
 
-    target_t(target_t &&other)
+    target_t(target_t &&other) noexcept
         : target(std::move(other.target))
+        , stack_size(other.stack_size)
+    {}
+
+    target_t(target_t &other) noexcept
+        : target(other.target)
         , stack_size(other.stack_size)
     {}
 
@@ -38,7 +43,7 @@ struct target_t
         , stack_size(stack_size_)
     {}
 
-    target_t &operator=(const target_t &other)
+    target_t &operator=(const target_t &other) noexcept
     {
         if (this != &other)
         {
@@ -48,7 +53,7 @@ struct target_t
         return *this;
     }
 
-    target_t &operator=(target_t &&other)
+    target_t &operator=(target_t &&other) noexcept
     {
         if (this != &other)
         {
