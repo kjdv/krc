@@ -6,6 +6,7 @@ add_executable(krc_test
   mutex.cc
   ptr_translate.cc
   queue.cc
+  ringbuffer.cc
   zero_queue.cc
 )
 target_link_libraries(krc_test krc krc_internal gtest)

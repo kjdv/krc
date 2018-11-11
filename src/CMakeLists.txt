@@ -19,6 +19,7 @@ add_library(krc
     mutex.cc
     ptr_translate.cc
     ptr_translate.hh
+    ringbuffer.hh
     runtime.cc
 )
 target_link_libraries(krc PRIVATE krc_internal)
