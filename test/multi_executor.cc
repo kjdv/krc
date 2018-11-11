@@ -20,14 +20,16 @@ public:
     void push(int i)
     {
         lock_t l(d_mut);
+        debug("consume " + std::to_string(i));
         items.push_back(i);
     }
 
     target_t::callable_t make_pusher(channel<int> &ch)
     {
-        return [this, &ch]{
+        return [this, ch]() mutable {
             for (int i : ch)
                 push(i);
+            debug("done consuming");
         };
     }
 
@@ -51,7 +53,8 @@ struct multi_executor_test : public testing::Test
     {
         return [this, max]{
             for(int i = 0; i < max; ++i)
-                this->chan.push(i);
+                this->chan.push(i);;
+            this->chan.close();
         };
     }
 };
@@ -79,7 +82,7 @@ TEST_F(multi_executor_test, two_tasks)
         sub2();
     }, 2);
 
-    EXPECT_THAT(coll.items, ElementsAre(1, 2, 3));
+    EXPECT_THAT(coll.items, ElementsAre(0, 1, 2));
 }
 
 }
