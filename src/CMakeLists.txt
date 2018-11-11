@@ -10,6 +10,7 @@ add_library(krc
     include/internal/zero_queue.hh
     include/internal/mutex.hh
     include/internal/no_copy.hh
+    include/internal/ringbuffer.hh
 
     context.hh
     context.cc
@@ -19,7 +20,7 @@ add_library(krc
     mutex.cc
     ptr_translate.cc
     ptr_translate.hh
-    ringbuffer.hh
+
     runtime.cc
 )
 target_link_libraries(krc PRIVATE krc_internal)

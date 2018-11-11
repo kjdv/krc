@@ -10,6 +10,7 @@
 #include "internal/no_copy.hh"
 
 namespace krc {
+namespace internal {
 
 template <typename T>
 class ringbuffer : private internal::no_copy
@@ -161,4 +162,5 @@ void ringbuffer<T>::close()
     d_closed = true;
 }
 
+}
 }

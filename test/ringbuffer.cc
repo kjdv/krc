@@ -1,8 +1,9 @@
-#include <ringbuffer.hh>
+#include <internal/ringbuffer.hh>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 namespace krc {
+namespace internal {
 namespace {
 
 using namespace std;
@@ -115,5 +116,6 @@ TEST(ringbuffer_test, try_pull_returns_empty_when_empty)
     EXPECT_FALSE(r.first.has_value());
 }
 
+}
 }
 }
