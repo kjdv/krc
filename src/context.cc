@@ -23,7 +23,7 @@ struct ucontext_handle
 
 enum { offset = sizeof(ucontext_handle) };
 
-ucontext_handle g_main;
+thread_local ucontext_handle t_main;
 
 thread_local context<context_method::UCONTEXT>::id g_current_id{context<context_method::UCONTEXT>::no_context};
 
@@ -85,15 +85,15 @@ context<context_method::UCONTEXT>::handle context<context_method::UCONTEXT>::mai
 {
     assert(g_current_id == no_context && "main() called from within an active context");
 
-    getcontext(&g_main.ctx);
-    return &g_main;
+    getcontext(&t_main.ctx);
+    return &t_main;
 }
 
 void context<context_method::UCONTEXT>::release(handle h)
 {
     ucontext_handle* handle = reinterpret_cast<ucontext_handle*>(h);
 
-    if(handle && handle != &g_main)
+    if(handle && handle != &t_main)
     {
         // clean up ourselves
         handle->~ucontext_handle();
