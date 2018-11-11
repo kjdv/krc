@@ -13,10 +13,10 @@ namespace {
 // nature an effect on a global or thread scope it seems like the right thing
 thread_local single_executor *t_exec{nullptr};
 
-struct defer
+struct deferA
 {
     std::function<void()> func;
-    ~defer()
+    ~deferA()
     {
         func();
     }
@@ -25,9 +25,26 @@ struct defer
 void consume(channel<target_t> ch)
 {
     assert(t_exec);
+    debug("start consuming on " + to_string((uintptr_t)t_exec));
     for(auto& item : ch)
         t_exec->dispatch(item);
-    debug("done consuming");
+    debug("done consuming "  + to_string((uintptr_t)t_exec));
+}
+
+void run_consumer(channel<target_t> ch)
+{
+    //defer cleanup {[]{
+    //        debug("setting sub to null");
+    //        t_exec = nullptr;
+    //}};
+    single_executor se;
+    t_exec = &se;
+
+    debug(string("run on ") + to_string((intptr_t)t_exec));
+    se.run([ch] { consume(ch); });
+
+    debug("setting sub to null");
+    //t_exec = nullptr;
 }
 
 }
@@ -59,18 +76,14 @@ void executor::run(target_t target, size_t num_threads)
 void executor::run_single(target_t target)
 {
     single_executor se;
-    t_exec = &se;
-    d_dispatcher = [](target_t item) {
+    d_dispatcher = [&se](target_t item) {
         assert(t_exec != nullptr);
         t_exec->dispatch(move(item));
     };
 
-    defer cleanup{[this] {
-            d_dispatcher = std::function<void(target_t)>();
-            t_exec = nullptr;
-    }};
-
     se.run(move(target));
+    d_dispatcher = std::function<void(target_t)>();
+    t_exec = nullptr;
 }
 
 void executor::run_multi(target_t target, size_t num_threads)
@@ -79,27 +92,9 @@ void executor::run_multi(target_t target, size_t num_threads)
 
     channel<target_t> dispatch_channel;
     vector<thread> subthreads;
-    defer joiner{[&subthreads]{
-        debug("joining threads");
-        for(auto&& t : subthreads)
-            t.join();
-    }};
 
     for (size_t i = 0; i < num_threads - 1; ++i)
-    {
-        subthreads.emplace_back([&dispatch_channel]{
-            defer cleanup {[]{
-                    debug("setting sub to null");
-                    t_exec = nullptr;
-            }};
-            single_executor se;
-            t_exec = &se;
-
-            debug(string("run on ") + to_string((intptr_t)t_exec));
-            se.run([&dispatch_channel] { consume(dispatch_channel); });
-            t_exec = nullptr;
-        });
-    }
+        subthreads.emplace_back([dispatch_channel] { run_consumer(dispatch_channel); });
 
     single_executor se;
     t_exec = &se;
@@ -108,12 +103,6 @@ void executor::run_multi(target_t target, size_t num_threads)
         dispatch_channel.push(move(item));
         debug("done dispatching");
     };
-
-    defer cleanup{[this] {
-           debug("setting main to null");
-           d_dispatcher = std::function<void(target_t)>();
-           t_exec = nullptr;
-    }};
 
     auto wrapped = [fn = move(target.target), &dispatch_channel] {
         debug("main");
@@ -126,6 +115,12 @@ void executor::run_multi(target_t target, size_t num_threads)
 
     se.run(target_t(wrapped, target.stack_size));
     debug("unwinding");
+
+    for(auto&& t : subthreads)
+        t.join();
+
+    d_dispatcher = std::function<void(target_t)>();
+   // t_exec = nullptr;
 }
 
 void executor::yield()

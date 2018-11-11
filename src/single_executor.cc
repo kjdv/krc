@@ -1,5 +1,6 @@
 #include "single_executor.hh"
 #include <cassert>
+#include "debug.hh"
 
 using namespace std;
 
@@ -45,6 +46,8 @@ void single_executor::run(target_t target)
 
 void single_executor::yield()
 {
+    debug("before yield " + std::to_string(d_schedule.size()) + " " + to_string((uintptr_t)this));
+
     gc();
 
     if(d_schedule.size() > 1)
@@ -54,6 +57,9 @@ void single_executor::yield()
 
         context<>::swap(d_schedule.back(), d_schedule.front());
     }
+
+
+    debug("after yield " + std::to_string(d_schedule.size()));
 }
 
 routine_id single_executor::get_id()
@@ -63,6 +69,7 @@ routine_id single_executor::get_id()
 
 void single_executor::next()
 {
+    debug("checking schedule " + to_string((uintptr_t)this));
     assert(!d_schedule.empty());
 
     gc();
@@ -77,6 +84,8 @@ void single_executor::next()
 
 void single_executor::cleanup()
 {
+    debug("cleaning up " + to_string((uintptr_t)this));
+
     gc();
 
     while(!d_schedule.empty())
