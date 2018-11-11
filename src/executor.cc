@@ -2,50 +2,45 @@
 #include <cassert>
 #include <channel.hh>
 #include "debug.hh"
+#include "single_executor.hh"
 
 using namespace std;
 
 namespace krc {
 namespace {
 
-// the purists will hate this use of singletons, but for this domain with
-// stacks changing underneath you and the (single) executor having by its
-// nature an effect on a global or thread scope it seems like the right thing
-thread_local single_executor *t_exec{nullptr};
+class noop_executor final: public executor_impl
+{
+public:
+    void dispatch(target_t) final
+    {
+        assert(false && "dispatch() called outside of run()");
+    }
 
-struct deferA
+    void run(target_t) final
+    {
+        assert(false && "unreachable");
+    }
+
+    void yield() final
+    {
+        this_thread::yield();
+    }
+
+    routine_id get_id() const final
+    {
+        return no_routine_id;
+    }
+};
+
+struct defer
 {
     std::function<void()> func;
-    ~deferA()
+    ~defer()
     {
         func();
     }
 };
-
-void consume(channel<target_t> ch)
-{
-    assert(t_exec);
-    debug("start consuming on " + to_string((uintptr_t)t_exec));
-    for(auto& item : ch)
-        t_exec->dispatch(item);
-    debug("done consuming "  + to_string((uintptr_t)t_exec));
-}
-
-void run_consumer(channel<target_t> ch)
-{
-    //defer cleanup {[]{
-    //        debug("setting sub to null");
-    //        t_exec = nullptr;
-    //}};
-    single_executor se;
-    t_exec = &se;
-
-    debug(string("run on ") + to_string((intptr_t)t_exec));
-    se.run([ch] { consume(ch); });
-
-    debug("setting sub to null");
-    //t_exec = nullptr;
-}
 
 }
 
@@ -58,13 +53,13 @@ executor& executor::instance()
 
 void executor::dispatch(target_t target)
 {
-    assert(d_dispatcher && "called from outside a krc execution scope");
-    d_dispatcher(move(target));
+    assert(d_delegate);
+    d_delegate->dispatch(move(target));
 }
 
 void executor::run(target_t target, size_t num_threads)
 {
-    assert(t_exec == nullptr && "run() called more than once");
+    assert(get_id() == no_routine_id && "run() called from within an active run()");
     assert(num_threads > 0 && "need at least one thread");
 
     if(num_threads == 1)
@@ -75,70 +70,32 @@ void executor::run(target_t target, size_t num_threads)
 
 void executor::run_single(target_t target)
 {
-    single_executor se;
-    d_dispatcher = [&se](target_t item) {
-        assert(t_exec != nullptr);
-        t_exec->dispatch(move(item));
-    };
-
-    se.run(move(target));
-    d_dispatcher = std::function<void(target_t)>();
-    t_exec = nullptr;
+    defer reset{[this] {
+        this->d_delegate = std::make_unique<noop_executor>();
+    }};
+    d_delegate = std::make_unique<single_executor>();
+    d_delegate->run(move(target));
 }
 
 void executor::run_multi(target_t target, size_t num_threads)
 {
     assert(num_threads >= 2);
-
-    channel<target_t> dispatch_channel;
-    vector<thread> subthreads;
-
-    for (size_t i = 0; i < num_threads - 1; ++i)
-        subthreads.emplace_back([dispatch_channel] { run_consumer(dispatch_channel); });
-
-    single_executor se;
-    t_exec = &se;
-    d_dispatcher = [&dispatch_channel](target_t item) {
-        debug("dispatching");
-        dispatch_channel.push(move(item));
-        debug("done dispatching");
-    };
-
-    auto wrapped = [fn = move(target.target), &dispatch_channel] {
-        debug("main");
-        debug(string("run on ") + to_string((intptr_t)t_exec));
-        fn();
-        debug("done with main");
-        dispatch_channel.close();
-        debug("fully done");
-    };
-
-    se.run(target_t(wrapped, target.stack_size));
-    debug("unwinding");
-
-    for(auto&& t : subthreads)
-        t.join();
-
-    d_dispatcher = std::function<void(target_t)>();
-   // t_exec = nullptr;
 }
 
 void executor::yield()
 {
-    debug("yielding");
-    if (t_exec != nullptr)
-        t_exec->yield();
-    else
-        this_thread::yield();
-    debug("done yield");
+    assert(d_delegate);
+    d_delegate->yield();
 }
 
-routine_id executor::get_id()
+routine_id executor::get_id() const
 {
-    return t_exec ? t_exec->get_id() : no_routine_id;
+    assert(d_delegate);
+    return d_delegate->get_id();
 }
 
 executor::executor()
+    : d_delegate(std::make_unique<noop_executor>())
 {}
 
 } // namespace krc

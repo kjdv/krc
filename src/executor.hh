@@ -1,10 +1,25 @@
 #pragma once
 
-#include "single_executor.hh"
+#include "runtime.hh"
+#include "internal/no_copy.hh"
 #include <thread>
 #include <vector>
 
 namespace krc {
+
+class executor_impl : private internal::no_copy
+{
+public:
+    virtual ~executor_impl() = default;
+
+    virtual void dispatch(target_t target) = 0;
+
+    virtual void run(target_t target) = 0;
+
+    virtual void yield() = 0;
+
+    virtual routine_id get_id() const = 0;
+};
 
 class executor : private internal::no_copy
 {
@@ -17,7 +32,7 @@ public:
 
     void yield();
 
-    routine_id get_id();
+    routine_id get_id() const;
 
 private:
     void run_single(target_t target);
@@ -27,7 +42,7 @@ private:
 
     executor();
 
-    std::function<void(target_t)> d_dispatcher;
+    std::unique_ptr<executor_impl> d_delegate;
 };
 
 } // namespace krc

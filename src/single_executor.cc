@@ -62,7 +62,7 @@ void single_executor::yield()
     debug("after yield " + std::to_string(d_schedule.size()));
 }
 
-routine_id single_executor::get_id()
+routine_id single_executor::get_id() const
 {
     return context<>::get_id();
 }

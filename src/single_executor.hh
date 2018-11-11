@@ -2,25 +2,25 @@
 
 #include "context.hh"
 #include "internal/no_copy.hh"
-#include "runtime.hh"
+#include "executor.hh"
 #include <queue>
 #include <vector>
 
 namespace krc {
 
-class single_executor : private internal::no_copy
+class single_executor : public executor_impl
 {
 public:
     explicit single_executor();
     ~single_executor();
 
-    void dispatch(target_t target);
+    void dispatch(target_t target) override;
 
-    void run(target_t target);
+    void run(target_t target) override;
 
-    void yield();
+    void yield() override;
 
-    routine_id get_id();
+    routine_id get_id() const override;
 
 private:
     void next();
