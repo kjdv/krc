@@ -5,7 +5,6 @@
 #include <mutex>
 #include <vector>
 
-
 namespace krc {
 namespace {
 
@@ -107,6 +106,24 @@ TEST_F(multi_executor_test, multi_producer)
         exec.dispatch(sub1);
         exec.dispatch(sub2);
         sub3();
+        wait(2);
+    }, 2);
+
+    EXPECT_THAT(coll.items, UnorderedElementsAre(0, 1, 2, 3, 4, 5));
+}
+
+TEST_F(multi_executor_test, multi_producer_multi_consumer)
+{
+    auto sub1 = make_consumer();
+    auto sub2 = make_consumer();
+    auto sub3 = make_producer(0, 3);
+    auto sub4 = make_producer(3, 6);
+
+    exec.run([&]{
+        exec.dispatch(sub1);
+        exec.dispatch(sub2);
+        exec.dispatch(sub3);
+        sub4();
         wait(2);
     }, 2);
 
