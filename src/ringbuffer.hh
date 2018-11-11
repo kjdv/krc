@@ -49,7 +49,7 @@ private:
 
     bool is_full() const
     {
-        return false; // d_write == d_read;
+        return next(d_write) == d_read;
     }
 
     size_t next(size_t idx) const

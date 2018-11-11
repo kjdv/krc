@@ -61,5 +61,59 @@ TEST(ringbuffer_test, close_disables_pull)
     EXPECT_FALSE(rb.pull().has_value());
 }
 
+TEST(ringbuffer_test, try_push_returns_closed_when_closed)
+{
+    using status = ringbuffer<int>::status;
+    ringbuffer<int> rb(1);
+    rb.close();
+    EXPECT_EQ(status::closed, rb.try_push(1));
+}
+
+TEST(ringbuffer_test, try_push_returns_full_when_full)
+{
+    using status = ringbuffer<int>::status;
+    ringbuffer<int> rb(1);
+    rb.push(1);
+    EXPECT_EQ(status::full, rb.try_push(2));
+}
+
+TEST(ringbuffer_test, try_push_returns_ok)
+{
+    using status = ringbuffer<int>::status;
+    ringbuffer<int> rb(1);
+    EXPECT_EQ(status::ok, rb.try_push(1));
+}
+
+TEST(ringbuffer_test, try_pull_returns_ok_and_closed)
+{
+    using status = ringbuffer<int>::status;
+    ringbuffer<int> rb(3);
+    rb.push(1);
+    rb.push(2);
+    rb.close();
+
+    auto r = rb.try_pull();
+    EXPECT_EQ(status::ok, r.second);
+    EXPECT_EQ(1, r.first.value());
+
+    r = rb.try_pull();
+    EXPECT_EQ(status::ok, r.second);
+    EXPECT_EQ(2, r.first.value());
+
+    r = rb.try_pull();
+    EXPECT_EQ(status::closed, r.second);
+    EXPECT_FALSE(r.first.has_value());
+}
+
+TEST(ringbuffer_test, try_pull_returns_empty_when_empty)
+{
+    using status = ringbuffer<int>::status;
+    ringbuffer<int> rb(1);
+
+    auto r = rb.try_pull();
+    EXPECT_EQ(status::empty, r.second);
+    EXPECT_FALSE(r.first.has_value());
+}
+
 }
 }
