@@ -1,4 +1,5 @@
 #include "multi_executor.hh"
+#include "debug.hh"
 
 namespace krc {
 
@@ -14,7 +15,9 @@ void consume(channel<target_t> ch, single_executor &exec)
 
 void consume_runner(channel<target_t> ch, single_executor &exec)
 {
+    debug("start consumer");
     exec.run([ch, &exec] { consume(ch, exec); });
+    debug("consumer finished");
 }
 
 struct defer
@@ -29,21 +32,24 @@ struct defer
 }
 
 multi_executor::multi_executor(size_t num_threads)
-    : d_subs(num_threads)
+    : d_subs(num_threads - 1)
 {
     assert(num_threads >= 2);
 
     for(auto& s : d_subs)
     {
         single_executor &se = s.exec;
-        s.thread = thread([this, &se] { consume_runner(d_dispatcher, se); });
+        s.thread = thread([this, &se] { consume_runner(d_dispatcher, se); debug("end sub"); });
     }
 }
 
 multi_executor::~multi_executor()
 {
     for(auto& s: d_subs)
-        s.thread.join();
+    {
+        if(s.thread.joinable())
+          s.thread.join();
+    }
 }
 
 void multi_executor::dispatch(target_t target)
@@ -54,12 +60,21 @@ void multi_executor::dispatch(target_t target)
 void multi_executor::run(target_t target)
 {
     auto wrapped = [this, &target] {
-        d_main.exec.dispatch([this] { consume(d_dispatcher, d_main.exec); });
+        d_main.exec.dispatch([this] {
+            consume(d_dispatcher, d_main.exec);
+            debug("end main");
+        });
         target.target();
         d_dispatcher.close();
+
+        debug("joining");
+        for (auto&& s : d_subs)
+            s.thread.join();
+        debug("joined");
     };
 
     d_main.exec.run(target_t(wrapped, target.stack_size));
+    debug("all done");
 }
 
 void multi_executor::yield()

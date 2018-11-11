@@ -64,6 +64,7 @@ routine_id single_executor::get_id() const
 
 void single_executor::next()
 {
+    debug("next");
     assert(!d_schedule.empty());
 
     gc();
@@ -71,7 +72,10 @@ void single_executor::next()
     d_schedule.pop();
 
     if(d_schedule.empty()) // nothing else to do, return to main
+    {
+        debug("back to main");
         context<>::set(d_main);
+    }
     else
         context<>::set(d_schedule.front());
 }
