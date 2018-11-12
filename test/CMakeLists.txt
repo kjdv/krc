@@ -6,6 +6,7 @@ add_executable(krc_test
   mutex.cc
   ptr_translate.cc
   queue.cc
+  semaphore.cc
   single_executor.cc
   ringbuffer.cc
   zero_queue.cc

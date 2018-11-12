@@ -11,6 +11,7 @@ add_library(krc
     include/internal/zero_queue.hh
     include/internal/mutex.hh
     include/internal/no_copy.hh
+    include/internal/semaphore.hh
     include/internal/ringbuffer.hh
 
     condition_variable.cc
@@ -27,6 +28,7 @@ add_library(krc
     ptr_translate.cc
     ptr_translate.hh
     runtime.cc
+    semaphore.cc
     single_executor.hh
     single_executor.cc
 )
