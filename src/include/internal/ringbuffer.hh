@@ -45,14 +45,19 @@ private:
         return d_closed;
     }
 
+    size_t size() const
+    {
+        return d_size;
+    }
+
     bool is_empty() const
     {
-        return d_write == d_read;
+        return size() == 0;
     }
 
     bool is_full()
     {
-        return next(d_write) == d_read;
+        return size() == capacity();
     }
 
     iter next(iter it)
@@ -76,16 +81,17 @@ private:
     std::vector<T> d_buffer;
     typename std::vector<T>::iterator d_read;
     typename std::vector<T>::iterator d_write;
+    size_t d_size{0};
     bool d_closed{false};
 };
 
 template <typename T>
 ringbuffer<T>::ringbuffer(size_t capacity)
-    : d_buffer(capacity+1)
+    : d_buffer(capacity)
     , d_read(d_buffer.begin())
     , d_write(d_buffer.begin())
 {
-    assert(d_buffer.size() > 1);
+    assert(d_buffer.size() >= 1);
 }
 
 template <typename T>
@@ -122,8 +128,11 @@ typename ringbuffer<T>::status ringbuffer<T>::try_push(U && item)
     if(is_full())
         return status::full;
 
+    assert(size() < capacity());
+
     *d_write = std::move(item);
     d_write = next(d_write);
+    ++d_size;
 
     return status::ok;
 }
@@ -162,8 +171,11 @@ std::pair<std::optional<T>, typename ringbuffer<T>::status> ringbuffer<T>::try_p
             return std::make_pair(std::optional<T>(), status::empty);
     }
 
+    assert(size() > 0);
+
     T result = std::move(*d_read);
     d_read = next(d_read);
+    --d_size;
 
     return std::make_pair<std::optional<T>, status>(result, status::ok);
 }

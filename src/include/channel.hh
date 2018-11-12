@@ -3,7 +3,7 @@
 #include <iterator>
 #include <memory>
 
-#include "internal/queue.hh"
+#include "internal/ringbuffer.hh"
 
 namespace krc {
 
@@ -13,7 +13,7 @@ class channel
 public:
     class iterator;
 
-    explicit channel(size_t queue_size = 0);
+    explicit channel(size_t buffer_size = 0);
 
     // push the item on the channel, returns true on success and false if
     // the channel is closed and the item could not be pushed
@@ -31,7 +31,7 @@ public:
     iterator end();
 
 private:
-    std::shared_ptr<internal::queue<T>> d_buffer;
+    std::shared_ptr<internal::ringbuffer<T>> d_buffer;
 };
 
 template <typename T>
@@ -89,8 +89,9 @@ private:
 };
 
 template <typename T>
-channel<T>::channel(size_t queue_size)
-    : d_buffer(std::make_shared<internal::queue<T>>(std::max<size_t>(1, queue_size)))
+channel<T>::channel(size_t buffer_size)
+    // todo: there must be an optimization possible for unbuffered channels
+    : d_buffer(std::make_shared<internal::ringbuffer<T>>(std::max<size_t>(1, buffer_size)))
 {}
 
 template <typename T> template<typename U>

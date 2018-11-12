@@ -6,14 +6,10 @@ add_library(krc
     include/io.hh
     include/runtime.hh
 
-    include/internal/condition_variable.hh
-    include/internal/queue.hh
-    include/internal/zero_queue.hh
     include/internal/mutex.hh
     include/internal/no_copy.hh
     include/internal/ringbuffer.hh
 
-    condition_variable.cc
     context.hh
     context.cc
     debug.hh
