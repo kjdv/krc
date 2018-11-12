@@ -3,7 +3,7 @@
 #include <iterator>
 #include <memory>
 
-#include "internal/ringbuffer.hh"
+#include "internal/queue.hh"
 
 namespace krc {
 
@@ -31,7 +31,7 @@ public:
     iterator end();
 
 private:
-    std::shared_ptr<internal::ringbuffer<T>> d_buffer;
+    std::shared_ptr<internal::queue<T>> d_buffer;
 };
 
 template <typename T>
@@ -90,7 +90,7 @@ private:
 
 template <typename T>
 channel<T>::channel(size_t queue_size)
-    : d_buffer(std::make_shared<internal::ringbuffer<T>>(std::max<size_t>(1, queue_size)))
+    : d_buffer(std::make_shared<internal::queue<T>>(std::max<size_t>(1, queue_size)))
 {}
 
 template <typename T> template<typename U>
