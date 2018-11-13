@@ -105,7 +105,6 @@ TEST(unbuffered, exchange_multi_producer_multi_consumer)
     EXPECT_THAT(vector<string>({s1, s2, s3}), UnorderedElementsAre("foo", "bar", "baz"));
 }
 
-/*
 TEST(unbuffered, close_means_push_returns_false)
 {
     unbuffered<string> ub;
@@ -113,6 +112,7 @@ TEST(unbuffered, close_means_push_returns_false)
 
     EXPECT_FALSE(ub.push(string()));
 }
+
 
 TEST(unbuffered, close_means_pull_returns_no_value)
 {
@@ -122,13 +122,12 @@ TEST(unbuffered, close_means_pull_returns_no_value)
     EXPECT_FALSE(ub.pull().has_value());
 }
 
-
 TEST(unbuffered, close_cancels_pending_push)
 {
     unbuffered<string> ub;
 
     thread t([&ub] {
-        EXPECT_FALSE(ub.push(string()));
+        ub.push(string()); // note: return value is undefined
     });
     defer join{[&t] { t.join(); }};
 
@@ -147,7 +146,6 @@ TEST(unbuffered, close_cancels_pending_pull)
     ub.close();
 }
 
-*/
 }
 }
 }

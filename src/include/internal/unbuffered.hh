@@ -21,15 +21,15 @@ public:
 private:
     bool is_closed() const
     {
-        return false;
+        return d_single_pusher.is_closed();
     }
 
     T *d_item{nullptr};
 
-    binary_semaphore d_pull{false};
+    closeable_binary_semaphore d_pull{false};
     binary_semaphore d_pull_done{false};
 
-    binary_semaphore d_single_pusher{true};
+    closeable_binary_semaphore d_single_pusher{true};
 };
 
 template <typename T>
@@ -40,6 +40,9 @@ bool unbuffered<T>::push(U&& item)
 
     d_single_pusher.wait();
     defer unlock{[this] { d_single_pusher.notify(); }};
+
+    if(is_closed())
+        return false;
 
     assert(d_item == nullptr);
     d_item = &item;
@@ -56,12 +59,13 @@ std::optional<T> unbuffered<T>::pull()
     d_pull.wait();
     defer done{[this] { d_pull_done.notify(); }};
 
+    if(is_closed())
+        return std::optional<T>();
+
     assert(d_item != nullptr);
 
     T result(std::move(*d_item));
     d_item = nullptr;
-
-    d_pull_done.notify();
 
     return result;
 }
@@ -70,9 +74,9 @@ template <typename T>
 void unbuffered<T>::close()
 {
   //  d_closed = true;
-  //  d_single_pusher.close();
-  //  d_pull.close();
-  //  d_pull_done.notify();
+  d_single_pusher.close();
+  d_pull.close();
+  d_pull_done.notify();
 }
 
 }
