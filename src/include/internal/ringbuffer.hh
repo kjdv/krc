@@ -7,7 +7,7 @@
 #include <mutex>
 #include <utility>
 #include "internal/mutex.hh"
-#include "internal/no_copy.hh"
+#include "internal/utils.hh"
 
 namespace krc {
 namespace internal {
@@ -114,6 +114,7 @@ template <typename T>
 template <typename U>
 typename ringbuffer<T>::status ringbuffer<T>::try_push(U && item)
 {
+    static_assert(std::is_convertible<U, T>::value);
     lock_t l(d_mutex);
 
     if(is_closed())

@@ -96,6 +96,7 @@ channel<T>::channel(size_t queue_size)
 template <typename T> template<typename U>
 bool channel<T>::push(U&& item)
 {
+    static_assert(std::is_convertible<U, T>::value);
     assert(d_buffer);
     return d_buffer->push(std::forward<U>(item));
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "no_copy.hh"
+#include "utils.hh"
 #include <atomic>
 
 namespace krc {

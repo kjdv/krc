@@ -1,5 +1,4 @@
-#include "internal/semaphore.hh"
-#include "internal/utils.hh"
+#include "internal/unbuffered.hh"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <string>
@@ -20,101 +19,79 @@ class exchange
 public:
     void produce(string& item)
     {
-        d_single_producer.wait();
-        defer unlock{[this] { d_single_producer.notify(); }};
-
-        assert(d_item == nullptr);
-        d_item = &item;
-
-        d_consume.notify();
-        d_consume_done.wait();
+        d_buf.push(item);
     }
 
     string consume()
     {
-        d_consume.wait();
-
-        assert(d_item != nullptr);
-
-        string result(std::move(*d_item));
-        d_item = nullptr;
-
-        d_consume_done.notify();
-
-        return result;
+        return d_buf.pull().value();
     }
 
 private:
-    string *d_item{nullptr};
-
-    binary_semaphore d_consume;
-    binary_semaphore d_produce;
-    binary_semaphore d_consume_done;
-
-    binary_semaphore d_single_producer{true};
+    unbuffered<string> d_buf;
 };
 
-TEST(semaphore, exchange)
+TEST(unbuffered, exchange)
 {
-    exchange exch;
+    unbuffered<string> exch;
     thread p([&exch] {
         string s("foo");
-        exch.produce(s);
+        exch.push(s);
     });
     defer join{[&] { p.join(); }};
 
-    EXPECT_EQ("foo", exch.consume());
+    EXPECT_EQ("foo", exch.pull());
 }
 
-TEST(semaphore, exchange_multi_producer)
+TEST(unbuffered, exchange_multi_producer)
 {
-    exchange exch;
+    unbuffered<string> exch;
 
     thread p1([&exch] {
         string s("foo");
-        exch.produce(s);
+        exch.push(s);
     });
     thread p2([&exch] {
         string s("bar");
-        exch.produce(s);
+        exch.push(s);
     });
     defer join{[&] {
         p1.join();
         p2.join();
     }};
 
-    vector<string> items = {exch.consume(), exch.consume()};
+    vector<string> items = {exch.pull().value(), exch.pull().value()};
     EXPECT_THAT(items, UnorderedElementsAre("foo", "bar"));
 }
 
-TEST(semaphore, exchange_multi_producer_multi_consumer)
+TEST(unbuffered, exchange_multi_producer_multi_consumer)
 {
-    exchange exch;
+    unbuffered<string> exch;
 
     string s1, s2, s3;
 
     {
         thread p1([&exch] {
             string s("foo");
-            exch.produce(s);
+            exch.push(s);
         });
         thread p2([&exch] {
             string s("bar");
-            exch.produce(s);
+            exch.push(s);
         });
         thread p3([&exch] {
             string s("baz");
-            exch.produce(s);
+            exch.push(s);
         });
 
         thread c1([&s1, &exch] {
-            s1 = exch.consume();
+            s1 = exch.pull().value();
         });
         thread c2([&s2, &exch] {
-            s2 = exch.consume();
+            s2 = exch.pull().value();
         });
         thread c3([&s3, &exch] {
-            s3 = exch.consume();
+            s3 = exch.pull().value();
         });
 
         c1.join();
