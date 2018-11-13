@@ -9,7 +9,7 @@ namespace {
 
 enum {
    NUM_THREADS = 4,
-   NUM_PRODUCERS = NUM_THREADS,
+   NUM_PRODUCERS = NUM_THREADS * 2,
    STACK_SIZE = 1<<24,
    MAX_INT = 10000,
 };
