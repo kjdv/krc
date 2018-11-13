@@ -100,10 +100,12 @@ channel<T>::channel(size_t buffer_size)
 {}
 
 template <typename T>
-typename channel<T>::buffer_t channel<T>::make_buffer(size_t buffer_size)
+std::shared_ptr<typename channel<T>::buffer_t> channel<T>::make_buffer(size_t buffer_size)
 {
     if(buffer_size)
-        return std::make_shared<buffer_t>(buffer_size);
+        return std::make_shared<buffer_t>(std::in_place_type<internal::ringbuffer<T>>, buffer_size);
+    else
+        return std::make_shared<buffer_t>(std::in_place_type<internal::unbuffered<T>>);
 }
 
 template <typename T> template<typename U>
@@ -111,21 +113,36 @@ bool channel<T>::push(U&& item)
 {
     static_assert(std::is_convertible<U, T>::value);
     assert(d_buffer);
-    return d_buffer->push(std::forward<U>(item));
+
+    auto visitor = [&item](auto&& b) {
+        return b.push(std::forward<U>(item));
+    };
+
+    return std::visit(visitor, *d_buffer);
 }
 
 template <typename T>
 std::optional<T> channel<T>::pull()
 {
     assert(d_buffer);
-    return d_buffer->pull();
+
+    auto visitor = [](auto&& b) {
+        return b.pull();
+    };
+
+    return std::visit(visitor, *d_buffer);
 }
 
 template <typename T>
 void channel<T>::close()
 {
     assert(d_buffer);
-    d_buffer->close();
+
+    auto visitor = [](auto&& b) {
+        b.close();
+    };
+
+    std::visit(visitor, *d_buffer);
 }
 
 template <typename T>
