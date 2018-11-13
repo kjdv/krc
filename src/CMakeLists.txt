@@ -13,6 +13,7 @@ add_library(krc
     include/internal/no_copy.hh
     include/internal/semaphore.hh
     include/internal/ringbuffer.hh
+    include/internal/utils.hh
 
     condition_variable.cc
     context.hh

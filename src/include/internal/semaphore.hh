@@ -5,19 +5,17 @@
 namespace krc {
 namespace internal {
 
-class semaphore
+class binary_semaphore
 {
 public:
-    explicit semaphore(int count = 0);
+    explicit binary_semaphore(bool init = false);
 
     void wait();
-
-    bool try_wait();
 
     void notify();
 
 private:
-    std::atomic<int> d_count;
+    std::atomic_char d_notified;
 };
 
 }

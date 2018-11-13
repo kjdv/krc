@@ -6,29 +6,23 @@ using namespace std;
 namespace krc {
 namespace internal {
 
-semaphore::semaphore(int count)
-    : d_count(count)
+binary_semaphore::binary_semaphore(bool init)
+    : d_notified(init)
 {}
 
-void semaphore::wait()
+void binary_semaphore::wait()
 {
     auto& exec = executor::instance();
-    while(!try_wait())
+
+    constexpr char c = 0;
+    while (!atomic_fetch_and(&d_notified, c))
         exec.yield();
 }
 
-bool semaphore::try_wait()
+void binary_semaphore::notify()
 {
-    int count = d_count;
-    if(count)
-        return d_count.compare_exchange_strong(count, count - 1);
-    else
-        return false;
-}
-
-void semaphore::notify()
-{
-    ++d_count;
+    constexpr char c = 1;
+    atomic_fetch_or(&d_notified, c);
 
     auto& exec = executor::instance();
     exec.yield();

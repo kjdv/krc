@@ -1,4 +1,5 @@
 #include "internal/semaphore.hh"
+#include "internal/utils.hh"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <string>
@@ -19,19 +20,19 @@ class exchange
 public:
     void produce(string& item)
     {
-        d_consume.wait();
+        d_single_producer.wait();
+        defer unlock{[this] { d_single_producer.notify(); }};
 
         assert(d_item == nullptr);
         d_item = &item;
 
-        d_produce.notify();
+        d_consume.notify();
         d_consume_done.wait();
     }
 
     string consume()
     {
-        d_consume.notify();
-        d_produce.wait();
+        d_consume.wait();
 
         assert(d_item != nullptr);
 
@@ -45,9 +46,12 @@ public:
 
 private:
     string *d_item{nullptr};
-    semaphore d_consume;
-    semaphore d_produce;
-    semaphore d_consume_done;
+
+    binary_semaphore d_consume;
+    binary_semaphore d_produce;
+    binary_semaphore d_consume_done;
+
+    binary_semaphore d_single_producer{true};
 };
 
 TEST(semaphore, exchange)

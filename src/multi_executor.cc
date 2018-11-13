@@ -1,8 +1,10 @@
 #include "multi_executor.hh"
+#include "internal/utils.hh"
 
 namespace krc {
 
 using namespace std;
+using internal::defer;
 
 namespace {
 
@@ -27,15 +29,6 @@ void consume_runner(channel<target_t> ch)
     se.run([ch] { consume(ch); });
     t_exec = nullptr;
 }
-
-struct defer
-{
-    std::function<void()> func;
-    ~defer()
-    {
-        func();
-    }
-};
 
 }
 
