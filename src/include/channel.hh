@@ -2,8 +2,10 @@
 
 #include <iterator>
 #include <memory>
+#include <variant>
 
 #include "internal/ringbuffer.hh"
+#include "internal/unbuffered.hh"
 
 namespace krc {
 
@@ -31,7 +33,11 @@ public:
     iterator end();
 
 private:
-    std::shared_ptr<internal::ringbuffer<T>> d_buffer;
+    using buffer_t = std::variant<internal::unbuffered<T>, internal::ringbuffer<T>>;
+
+    static std::shared_ptr<buffer_t> make_buffer(size_t buffer_size);
+
+    std::shared_ptr<buffer_t> d_buffer;
 };
 
 template <typename T>
@@ -90,13 +96,20 @@ private:
 
 template <typename T>
 channel<T>::channel(size_t buffer_size)
-    // todo: there must be an optimization possible for unbuffered channels
-    : d_buffer(std::make_shared<internal::ringbuffer<T>>(std::max<size_t>(1, buffer_size)))
+    : d_buffer(make_buffer(buffer_size))
 {}
+
+template <typename T>
+typename channel<T>::buffer_t channel<T>::make_buffer(size_t buffer_size)
+{
+    if(buffer_size)
+        return std::make_shared<buffer_t>(buffer_size);
+}
 
 template <typename T> template<typename U>
 bool channel<T>::push(U&& item)
 {
+    static_assert(std::is_convertible<U, T>::value);
     assert(d_buffer);
     return d_buffer->push(std::forward<U>(item));
 }

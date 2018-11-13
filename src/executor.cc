@@ -3,11 +3,14 @@
 #include <channel.hh>
 #include "single_executor.hh"
 #include "multi_executor.hh"
+#include "internal/utils.hh"
 
 using namespace std;
 
 namespace krc {
 namespace {
+
+using internal::defer;
 
 class noop_executor final: public executor_impl
 {
@@ -30,15 +33,6 @@ public:
     routine_id get_id() const final
     {
         return no_routine_id;
-    }
-};
-
-struct defer
-{
-    std::function<void()> func;
-    ~defer()
-    {
-        func();
     }
 };
 

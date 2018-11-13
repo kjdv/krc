@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 namespace krc {
 namespace internal {
 
@@ -11,5 +13,14 @@ struct no_copy
     no_copy& operator=(const no_copy&) = delete;
 };
 
-} // namespace internal
-} // namespace krc
+struct defer
+{
+    std::function<void()> func;
+    ~defer()
+    {
+        func();
+    }
+};
+
+}
+}
