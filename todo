@@ -3,11 +3,11 @@
 [-] (deferred) configurable switch between ucontext and fcontext from Boost.Context
 [x] support for informational routine ids
 [x] io support
-[ ] threading support
+[x] threading support
+[ ] threads to rebalance their load
 [ ] threaded functional equivalent
 [ ] signal handling
 
 [ ] extended io support
     [ ] iostreams
     [ ] open/connect yields
-

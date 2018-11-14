@@ -8,9 +8,9 @@ This has to be seen as an exploration mostly to satisfy the curiosity of the aut
 
 ## Important caveats
 
-At the time of writing only message passing within a single thread is supported. This is an obvious and likely show-stopping limitation for any serious application.
+Important caveat is that started routines must not leak exceptions, doing so is undefined behaviour.
 
-Another caveat is that started routines must not leak exceptions, doing so is undefined behaviour.
+Another, possibly important, caveat is that dispatched jobs will always stay on their original thread. Depending on your usage you may end up with your work unbalanced across your threads.
 
 ## Usage
 
@@ -29,6 +29,11 @@ void foo();
 
 krc::run(foo);
 // run will return once foo() (and alls its subroutines, if any) has finished
+
+krc::run(foo, 4);
+// will run one 4 threads, one thread will run foo, while dispatch()ed jobs can
+// on any of the four threads.
+// Once foo() completes, the threads are joined and run() returns.
 ```
 
 To start another subroutine, use `dispatch()`. Note this is undefined behaviour unless `dispatch()` is called from within a krc-managed routine.
