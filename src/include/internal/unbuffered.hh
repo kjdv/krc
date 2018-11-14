@@ -3,6 +3,7 @@
 #include "semaphore.hh"
 #include "utils.hh"
 #include <optional>
+#include <cassert>
 
 namespace krc {
 namespace internal {
