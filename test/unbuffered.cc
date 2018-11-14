@@ -23,7 +23,7 @@ TEST(unbuffered, exchange)
     });
     defer join{[&] { p.join(); }};
 
-    EXPECT_EQ("foo", exch.pull());
+    EXPECT_EQ("foo", exch.pull().value());
 }
 
 TEST(unbuffered, exchange_multi_producer)
