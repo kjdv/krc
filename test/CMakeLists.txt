@@ -1,15 +1,6 @@
-add_executable(krc_test
-  context.cc
-  channel.cc
-  io.cc
-  multi_executor.cc
-  mutex.cc
-  ptr_translate.cc
-  single_executor.cc
-  ringbuffer.cc
-  unbuffered.cc
-)
-target_link_libraries(krc_test krc krc_internal gtest)
+file(GLOB sources *.c *.cc *.cpp *.h *.hh)
 
-add_test(unit_test krc_test)
-add_test(soak_test krc_test --gtest_shuffle --gtest_repeat=100)
+add_executable(krc_test ${sources})
+target_link_libraries(krc_test krc ${GMOCK_LIBRARIES} GTest::GTest GTest::Main)
+
+gtest_discover_tests(krc_test)

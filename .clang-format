@@ -1,6 +1,6 @@
 ---
 Language:        Cpp
-AccessModifierOffset: -4
+AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
@@ -30,7 +30,6 @@ BraceWrapping:
   BeforeCatch:     true
   BeforeElse:      true
   IndentBraces:    false
-  SplitEmptyFunction: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: true
@@ -38,7 +37,7 @@ BreakConstructorInitializersBeforeComma: true
 ColumnLimit:     0
 CommentPragmas:  '^ IWYU pragma:'
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
-ConstructorInitializerIndentWidth: 4
+ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DerivePointerAlignment: false
@@ -50,14 +49,14 @@ IncludeCategories:
   - Regex:           '.*'
     Priority:        1
 IndentCaseLabels: false
-IndentWidth:     4
+IndentWidth:     2
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: true
 MacroBlockBegin: ''
 MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-ObjCBlockIndentWidth: 4
+ObjCBlockIndentWidth: 2
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PenaltyBreakBeforeFirstCallParameter: 19

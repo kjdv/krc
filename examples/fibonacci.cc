@@ -37,13 +37,7 @@ void fibonacci(int n)
 
 int main(int argc, char** argv)
 {
-    if(argc < 2)
-    {
-        cerr << "usage: " << argv[0] << " N" << endl;
-        return 1;
-    }
-
-    int n = atoi(argv[1]);
+    int n = argc < 2 ? 10 : atoi(argv[1]);
     if(n < 1)
     {
         cerr << "please enter a number >= 0, not " << argv[1] << endl;

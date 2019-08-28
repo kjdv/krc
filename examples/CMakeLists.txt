@@ -1,30 +1,11 @@
-add_executable(context_switch
-    context_switch.cc
-)
-target_link_libraries(context_switch krc krc_internal)
-add_test(context_switch context_switch)
+file(GLOB examples *.cc *.cpp *.c)
 
-add_executable(executor
-    executor.cc
-)
-target_link_libraries(executor krc)
-add_test(executor executor)
+foreach(example ${examples})
+  get_filename_component(example_name ${example} NAME_WE)
 
-add_executable(fibonacci
-    fibonacci.cc
-)
-target_link_libraries(fibonacci krc)
-add_test(fibonacci fibonacci 10)
-
-add_executable(io
-    io.cc
-)
-target_link_libraries(io krc)
-add_test(io io )
-
-add_executable(multithreading
-    multithreading.cc
-)
-target_link_libraries(multithreading krc)
-add_test(multithreading multithreading)
-
+  add_executable(${example_name} ${example})
+  target_link_libraries(${example_name} PUBLIC krc)
+  
+  add_test(example.${example_name} ${example_name})
+  
+endforeach()
