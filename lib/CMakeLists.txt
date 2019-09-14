@@ -14,6 +14,8 @@ target_include_directories(krc
       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
+target_link_libraries(krc PUBLIC Threads::Threads)
+
 if(APPLE)
     # for osx we need to pass -D_XOPEN_SOURCE to be able to use the 'deprecated' {set,swap,make}context functions
     target_compile_options(krc PRIVATE -D_XOPEN_SOURCE -Wno-deprecated-declarations)

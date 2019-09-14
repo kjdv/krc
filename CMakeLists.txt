@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 project(krc)
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(Threads REQUIRED)
+
 include(GoogleTest)
 find_package(GTest MODULE REQUIRED)
 find_library(GMOCK_LIBRARIES gmock)
