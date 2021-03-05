@@ -4,6 +4,7 @@
 #include <functional>
 #include <signal.h>
 #include <type_traits>
+#include <cstdint>
 
 namespace krc {
 
